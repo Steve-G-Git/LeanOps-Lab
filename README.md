@@ -6,9 +6,9 @@ This is a self-directed lab project. It does not represent professional employme
 
 ## Current status
 
-**Status: Active development, 3 PDCA cycles completed**
+**Status: Active development, 4 PDCA cycles completed**
 
-Cycle 03 established key-based SSH access and disabled remote password authentication after repeated anti-lockout verification.
+Cycle 04 established a host firewall with a default-deny inbound policy and a source-restricted SSH rule.
 
 ## Verified outcomes
 
@@ -17,6 +17,7 @@ Cycle 03 established key-based SSH access and disabled remote password authentic
 | 01 | Unnecessary HTTP service | Stopped and disabled Apache | Port 80 closed; SSH retained after reboot |
 | 02 | Administration address could change | Assigned a static host-only address | Address, SSH, routing, DNS, and NAT persisted |
 | 03 | SSH allowed password authentication | Established key authentication and disabled SSH passwords | Key access persisted; password-only access was rejected; port baseline retained |
+| 04 | No active host firewall | Enabled UFW with default-deny inbound policy and source-restricted SSH | Approved SSH persisted; 999 other common TCP ports changed from closed to filtered |
 
 ## Skills demonstrated
 
@@ -25,6 +26,7 @@ Cycle 03 established key-based SSH access and disabled remote password authentic
 - Nmap and PowerShell testing
 - SSH administration
 - SSH key-based authentication
+- UFW host firewall administration
 - VirtualBox networking
 - Controlled change management
 - Troubleshooting documentation
@@ -53,9 +55,11 @@ flowchart LR
 - [`docs/pdca/PDCA-01-apache-service-reduction.md`](docs/pdca/PDCA-01-apache-service-reduction.md): complete Plan, Do, Check, Act record
 - [`docs/pdca/PDCA-02-static-host-only-address.md`](docs/pdca/PDCA-02-static-host-only-address.md): static-address improvement and verification record
 - [`docs/pdca/PDCA-03-ssh-key-authentication.md`](docs/pdca/PDCA-03-ssh-key-authentication.md): key-authentication and SSH-hardening record
+- [`docs/pdca/PDCA-04-ufw-host-firewall.md`](docs/pdca/PDCA-04-ufw-host-firewall.md): host-firewall configuration and verification record
 - [`docs/runbooks/verify-host-only-connectivity.md`](docs/runbooks/verify-host-only-connectivity.md): standardized connectivity verification
 - [`docs/runbooks/configure-static-host-only-address.md`](docs/runbooks/configure-static-host-only-address.md): repeatable static-address configuration and recovery procedure
 - [`docs/runbooks/configure-ssh-key-authentication.md`](docs/runbooks/configure-ssh-key-authentication.md): safe key setup, hardening, verification, and recovery procedure
+- [`docs/runbooks/configure-ufw-host-firewall.md`](docs/runbooks/configure-ufw-host-firewall.md): source-restricted firewall setup, testing, and recovery procedure
 - [`docs/change-log.md`](docs/change-log.md): chronological record of controlled changes
 - [`docs/security-considerations.md`](docs/security-considerations.md): isolation, evidence-sanitization, and remaining risks
 
@@ -76,4 +80,4 @@ Public evidence will be sanitized before it is added. Passwords, authentication 
 
 ## Next improvement
 
-The next cycle has not been selected. It will be based on an observed risk, repeatability gap, or support need rather than added only to make the lab larger. Snapshot `07-PDCA03-SSHKeyOnlyVerified` is the current recovery point.
+The next cycle has not been selected. It will be based on an observed risk, repeatability gap, or support need rather than added only to make the lab larger. Snapshot `09-PDCA04-UFWVerified` is the current recovery point.

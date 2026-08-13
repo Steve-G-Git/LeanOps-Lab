@@ -11,6 +11,8 @@
 | 2026-08-12 | Added persistent `systemd-networkd` configuration for `enp0s8` | Prevent the documented administration address from changing with a DHCP lease | Static `192.168.244.10/24` survived reboot; ping, SSH, NAT, DNS, and routing passed; only TCP 22 remained open | Remove `/etc/systemd/network/20-leanops-enp0s8.network` and reboot, or restore `04-PDCA02-PreStaticAddress` |
 | 2026-08-13 | Added a dedicated Ed25519 public key for `leanopsadmin` | Establish a stronger SSH authentication method before changing password access | Key-only login succeeded in two independent sessions and after reboot; permissions verified as `700` and `600` | Clear the added `authorized_keys` entry from the local console, or restore `05-PDCA02-StaticAddressVerified` |
 | 2026-08-13 | Added `00-leanops-auth.conf` to disable SSH password and keyboard-interactive authentication | Reduce remote authentication exposure after key access was proven reliable | Effective settings showed key authentication enabled and password authentication disabled; key login survived reboot; password-only login was rejected; only TCP 22 remained open | Remove the drop-in and reload SSH from an existing key session or local console, or restore `06-PDCA03-KeyAuthVerified` |
+| 2026-08-13 | Enabled UFW with default-deny inbound and default-allow outbound policies | Add explicit host-level enforcement instead of relying only on unused services remaining disabled | Key-authenticated SSH, outbound internet access, DNS, and UFW state survived reboot; 999 commonly scanned TCP ports were filtered | Run `sudo ufw disable` from an existing session or local console, or restore `08-PDCA04-PreUFW` |
+| 2026-08-13 | Restricted the UFW SSH rule to source `192.168.244.1` | Limit SSH admission to the Windows host-only administrative endpoint | Fresh and post-reboot SSH connections succeeded from the approved source; no unrestricted TCP 22 rule was present | Delete the restricted rule from the local console after establishing an approved replacement, or restore `08-PDCA04-PreUFW` |
 
 ## Snapshot checkpoints
 
@@ -24,3 +26,5 @@
 | `05-PDCA02-StaticAddressVerified` | Static `192.168.244.10/24` persisted after reboot; SSH, NAT, DNS, routing, and service exposure verified |
 | `06-PDCA03-KeyAuthVerified` | Dedicated key authentication verified independently and after reboot; SSH password authentication still enabled |
 | `07-PDCA03-SSHKeyOnlyVerified` | Key authentication persisted after reboot; password-only SSH rejected; only TCP 22 open |
+| `08-PDCA04-PreUFW` | UFW inactive with no saved user rules; key-only SSH and Cycle 03 state verified |
+| `09-PDCA04-UFWVerified` | UFW active with default-deny inbound policy; SSH restricted to `192.168.244.1`; outbound access, DNS, and reboot persistence verified |

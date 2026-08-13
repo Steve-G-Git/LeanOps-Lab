@@ -55,3 +55,18 @@ The final Cycle 03 Nmap scan against `192.168.244.10` found TCP port 22 open and
 | Negative test | Password-only login rejected |
 
 Authentication hardening changed how SSH validates users but did not add another listening service or port.
+
+## Host firewall standard
+
+| Control | Verified state |
+|---|---|
+| UFW status | Active and enabled at startup |
+| Default incoming policy | Deny |
+| Default outgoing policy | Allow |
+| Routed traffic | Disabled |
+| SSH rule | Allow TCP 22 from `192.168.244.1` only |
+| Nmap from approved workstation | TCP 22 open; 999 commonly scanned TCP ports filtered |
+| Outbound routing | Successful |
+| DNS resolution | Successful after reboot |
+
+Before UFW was enabled, the 999 non-listening commonly scanned TCP ports were reported as closed with resets. With UFW active, the same ports were reported as filtered with no response. The approved SSH path remained available.
