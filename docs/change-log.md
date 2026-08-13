@@ -13,6 +13,8 @@
 | 2026-08-13 | Added `00-leanops-auth.conf` to disable SSH password and keyboard-interactive authentication | Reduce remote authentication exposure after key access was proven reliable | Effective settings showed key authentication enabled and password authentication disabled; key login survived reboot; password-only login was rejected; only TCP 22 remained open | Remove the drop-in and reload SSH from an existing key session or local console, or restore `06-PDCA03-KeyAuthVerified` |
 | 2026-08-13 | Enabled UFW with default-deny inbound and default-allow outbound policies | Add explicit host-level enforcement instead of relying only on unused services remaining disabled | Key-authenticated SSH, outbound internet access, DNS, and UFW state survived reboot; 999 commonly scanned TCP ports were filtered | Run `sudo ufw disable` from an existing session or local console, or restore `08-PDCA04-PreUFW` |
 | 2026-08-13 | Restricted the UFW SSH rule to source `192.168.244.1` | Limit SSH admission to the Windows host-only administrative endpoint | Fresh and post-reboot SSH connections succeeded from the approved source; no unrestricted TCP 22 rule was present | Delete the restricted rule from the local console after establishing an approved replacement, or restore `08-PDCA04-PreUFW` |
+| 2026-08-13 | Added a root-controlled allowlist and configuration-backup script | Reduce reliance on VM snapshots and make critical configuration recovery repeatable | Script syntax passed; exactly seven approved regular files entered the archive; archive listing and SHA-256 verification passed | Remove `/etc/leanops-backup-files`, `/usr/local/sbin/leanops-config-backup`, and `/var/backups/leanops`, or restore `10-PDCA05-PreConfigBackup` |
+| 2026-08-13 | Performed isolated restoration and off-VM backup verification | Prove the package could be restored and remained intact after transfer | Seven restored files matched live sources byte-for-byte with matching ownership and permissions; Windows SHA-256 comparison passed; protected Ubuntu archive remained valid after reboot | Retain the verified server state and remove only unneeded test or export copies |
 
 ## Snapshot checkpoints
 
@@ -28,3 +30,5 @@
 | `07-PDCA03-SSHKeyOnlyVerified` | Key authentication persisted after reboot; password-only SSH rejected; only TCP 22 open |
 | `08-PDCA04-PreUFW` | UFW inactive with no saved user rules; key-only SSH and Cycle 03 state verified |
 | `09-PDCA04-UFWVerified` | UFW active with default-deny inbound policy; SSH restricted to `192.168.244.1`; outbound access, DNS, and reboot persistence verified |
+| `10-PDCA05-PreConfigBackup` | Verified Cycle 04 state before adding the configuration-backup process |
+| `11-PDCA05-ConfigBackupVerified` | Protected seven-file backup, isolated restore, off-VM checksum verification, service state, networking, firewall policy, and reboot persistence verified |

@@ -6,9 +6,9 @@ This is a self-directed lab project. It does not represent professional employme
 
 ## Current status
 
-**Status: Active development, 4 PDCA cycles completed**
+**Status: Active development, 5 PDCA cycles completed**
 
-Cycle 04 established a host firewall with a default-deny inbound policy and a source-restricted SSH rule.
+Cycle 05 established a protected, allowlist-based configuration backup and verified it through checksum validation, isolated restoration, metadata comparison, off-VM transfer, and reboot testing.
 
 ## Verified outcomes
 
@@ -18,6 +18,7 @@ Cycle 04 established a host firewall with a default-deny inbound policy and a so
 | 02 | Administration address could change | Assigned a static host-only address | Address, SSH, routing, DNS, and NAT persisted |
 | 03 | SSH allowed password authentication | Established key authentication and disabled SSH passwords | Key access persisted; password-only access was rejected; port baseline retained |
 | 04 | No active host firewall | Enabled UFW with default-deny inbound policy and source-restricted SSH | Approved SSH persisted; 999 other common TCP ports changed from closed to filtered |
+| 05 | Recovery depended on VM snapshots | Created a protected, portable configuration backup process | Seven approved files restored byte-for-byte with matching metadata; Ubuntu and Windows checksum tests passed |
 
 ## Skills demonstrated
 
@@ -27,6 +28,10 @@ Cycle 04 established a host firewall with a default-deny inbound policy and a so
 - SSH administration
 - SSH key-based authentication
 - UFW host firewall administration
+- Bash backup scripting
+- SHA-256 integrity verification
+- Isolated configuration restoration
+- Backup scope and permission control
 - VirtualBox networking
 - Controlled change management
 - Troubleshooting documentation
@@ -56,10 +61,12 @@ flowchart LR
 - [`docs/pdca/PDCA-02-static-host-only-address.md`](docs/pdca/PDCA-02-static-host-only-address.md): static-address improvement and verification record
 - [`docs/pdca/PDCA-03-ssh-key-authentication.md`](docs/pdca/PDCA-03-ssh-key-authentication.md): key-authentication and SSH-hardening record
 - [`docs/pdca/PDCA-04-ufw-host-firewall.md`](docs/pdca/PDCA-04-ufw-host-firewall.md): host-firewall configuration and verification record
+- [`docs/pdca/PDCA-05-configuration-backup.md`](docs/pdca/PDCA-05-configuration-backup.md): protected configuration-backup and isolated-restore record
 - [`docs/runbooks/verify-host-only-connectivity.md`](docs/runbooks/verify-host-only-connectivity.md): standardized connectivity verification
 - [`docs/runbooks/configure-static-host-only-address.md`](docs/runbooks/configure-static-host-only-address.md): repeatable static-address configuration and recovery procedure
 - [`docs/runbooks/configure-ssh-key-authentication.md`](docs/runbooks/configure-ssh-key-authentication.md): safe key setup, hardening, verification, and recovery procedure
 - [`docs/runbooks/configure-ufw-host-firewall.md`](docs/runbooks/configure-ufw-host-firewall.md): source-restricted firewall setup, testing, and recovery procedure
+- [`docs/runbooks/backup-and-restore-configuration.md`](docs/runbooks/backup-and-restore-configuration.md): repeatable backup, integrity verification, isolated restore, and controlled live recovery procedure
 - [`docs/change-log.md`](docs/change-log.md): chronological record of controlled changes
 - [`docs/security-considerations.md`](docs/security-considerations.md): isolation, evidence-sanitization, and remaining risks
 
@@ -72,7 +79,7 @@ flowchart LR
 - Apache HTTP Server
 - Nmap 7.99 and Npcap 1.87
 - PowerShell
-- Linux command-line tools including `systemctl`, `ss`, `ip`, `lsblk`, and `free`
+- Linux command-line tools including `systemctl`, `ss`, `ip`, `tar`, `sha256sum`, `stat`, `cmp`, `mktemp`, `lsblk`, and `free`
 
 ## Evidence policy
 
@@ -80,4 +87,4 @@ Public evidence will be sanitized before it is added. Passwords, authentication 
 
 ## Next improvement
 
-The next cycle has not been selected. It will be based on an observed risk, repeatability gap, or support need rather than added only to make the lab larger. Snapshot `09-PDCA04-UFWVerified` is the current recovery point.
+Cycle 06 will build a repeatable health-check script for SSH, UFW, addressing, DNS, disk, memory, and update state. Snapshot `11-PDCA05-ConfigBackupVerified` is the current recovery point.

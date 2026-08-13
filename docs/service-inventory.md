@@ -70,3 +70,21 @@ Authentication hardening changed how SSH validates users but did not add another
 | DNS resolution | Successful after reboot |
 
 Before UFW was enabled, the 999 non-listening commonly scanned TCP ports were reported as closed with resets. With UFW active, the same ports were reported as filtered with no response. The approved SSH path remained available.
+
+## Configuration recovery standard
+
+The backup process does not add a listening service or network port.
+
+| Control | Verified state |
+|---|---|
+| Source definition | Root-controlled seven-file allowlist |
+| Backup destination | `/var/backups/leanops` with mode `700` |
+| Backup artifacts | Archive, manifest, and SHA-256 checksum with mode `600` |
+| Scope validation | Approved regular files only; symbolic-link sources rejected |
+| Archive inspection | Exactly seven expected paths listed |
+| Isolated restore | Seven byte-for-byte content matches |
+| Restored metadata | Seven ownership and permission matches |
+| Off-VM verification | SHA-256 comparison passed on Windows |
+| Post-reboot state | Script, allowlist, protected archive, SSH, UFW, networking, and DNS verified |
+
+This is a selected-configuration recovery control, not a complete server or disaster-recovery backup.

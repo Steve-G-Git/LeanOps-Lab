@@ -19,6 +19,17 @@
 - Apache remains installed but stopped and disabled.
 - Ubuntu package updates were applied before the first service cycle.
 
+## Configuration backup controls
+
+- `/var/backups/leanops` is owned by `root:root` with mode `700`.
+- The root-controlled allowlist has mode `600` and limits each archive to seven approved regular files.
+- The backup script has mode `700` and rejects absolute paths, parent-directory traversal, missing files, and symbolic-link sources.
+- Archives, manifests, and checksum files have mode `600`.
+- Backup scope excludes private SSH keys, `authorized_keys`, password databases, logs, and machine-specific identifiers.
+- Each archive is listed after creation and receives a SHA-256 checksum.
+- Restoration testing occurs in an isolated temporary directory before any live replacement is considered.
+- A verified package is stored off the VM on the Windows administrative workstation.
+
 ## Evidence sanitization
 
 Before publication, screenshots and copied output must be checked for:
@@ -40,3 +51,7 @@ The fictional lab addresses `10.0.2.0/24` and `192.168.244.0/24` may be document
 - The SSH firewall rule depends on the Windows host-only address remaining `192.168.244.1`.
 - The NAT adapter should be disconnected before any future exercise that intentionally creates a higher-risk service condition.
 - Installed but disabled Apache packages still require updates while retained for rollback.
+- The package protects selected configuration files only. It is not a full-system backup and does not preserve installed packages, user data, SSH host keys, or the VM itself.
+- SHA-256 detects corruption or unexpected changes but does not authenticate who created the archive.
+- Because `authorized_keys` is intentionally excluded, administrative public-key access must be provisioned before restoring the key-only SSH configuration to a replacement server.
+- The Windows backup currently represents one off-VM copy. A separate encrypted or versioned backup destination has not yet been established.
