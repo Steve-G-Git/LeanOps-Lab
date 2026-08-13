@@ -6,9 +6,9 @@ This is a self-directed lab project. It does not represent professional employme
 
 ## Current status
 
-**Status: Active development, 2 PDCA cycles completed**
+**Status: Active development, 3 PDCA cycles completed**
 
-Cycle 03 is in progress: establish and verify SSH key authentication before considering whether to disable password authentication.
+Cycle 03 established key-based SSH access and disabled remote password authentication after repeated anti-lockout verification.
 
 ## Verified outcomes
 
@@ -16,6 +16,7 @@ Cycle 03 is in progress: establish and verify SSH key authentication before cons
 |---|---|---|---|
 | 01 | Unnecessary HTTP service | Stopped and disabled Apache | Port 80 closed; SSH retained after reboot |
 | 02 | Administration address could change | Assigned a static host-only address | Address, SSH, routing, DNS, and NAT persisted |
+| 03 | SSH allowed password authentication | Established key authentication and disabled SSH passwords | Key access persisted; password-only access was rejected; port baseline retained |
 
 ## Skills demonstrated
 
@@ -23,6 +24,7 @@ Cycle 03 is in progress: establish and verify SSH key authentication before cons
 - TCP/IP and service validation
 - Nmap and PowerShell testing
 - SSH administration
+- SSH key-based authentication
 - VirtualBox networking
 - Controlled change management
 - Troubleshooting documentation
@@ -50,8 +52,10 @@ flowchart LR
 - [`docs/service-inventory.md`](docs/service-inventory.md): internal and externally observed services
 - [`docs/pdca/PDCA-01-apache-service-reduction.md`](docs/pdca/PDCA-01-apache-service-reduction.md): complete Plan, Do, Check, Act record
 - [`docs/pdca/PDCA-02-static-host-only-address.md`](docs/pdca/PDCA-02-static-host-only-address.md): static-address improvement and verification record
+- [`docs/pdca/PDCA-03-ssh-key-authentication.md`](docs/pdca/PDCA-03-ssh-key-authentication.md): key-authentication and SSH-hardening record
 - [`docs/runbooks/verify-host-only-connectivity.md`](docs/runbooks/verify-host-only-connectivity.md): standardized connectivity verification
 - [`docs/runbooks/configure-static-host-only-address.md`](docs/runbooks/configure-static-host-only-address.md): repeatable static-address configuration and recovery procedure
+- [`docs/runbooks/configure-ssh-key-authentication.md`](docs/runbooks/configure-ssh-key-authentication.md): safe key setup, hardening, verification, and recovery procedure
 - [`docs/change-log.md`](docs/change-log.md): chronological record of controlled changes
 - [`docs/security-considerations.md`](docs/security-considerations.md): isolation, evidence-sanitization, and remaining risks
 
@@ -70,6 +74,6 @@ flowchart LR
 
 Public evidence will be sanitized before it is added. Passwords, authentication material, real home-network information, personal usernames, unique system identifiers, and unnecessary MAC addresses will not be published.
 
-## Current improvement
+## Next improvement
 
-Cycle 03 is in progress. The current rollback point is snapshot `05-PDCA02-StaticAddressVerified`. Key authentication will be established and verified in a separate session before any decision is made about password authentication.
+The next cycle has not been selected. It will be based on an observed risk, repeatability gap, or support need rather than added only to make the lab larger. Snapshot `07-PDCA03-SSHKeyOnlyVerified` is the current recovery point.

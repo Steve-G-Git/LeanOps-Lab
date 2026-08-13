@@ -32,7 +32,7 @@ Apache 2.4.66 was installed from Ubuntu's official package repositories to simul
 | 22/TCP | OpenSSH | Listening | Open |
 | 80/TCP | Apache HTTP | Listening on `*:80` | Open, HTTP `200 OK` |
 
-## Improved standard
+## Improved service standard
 
 Apache remains installed for simple rollback, but it is stopped and disabled.
 
@@ -41,4 +41,17 @@ Apache remains installed for simple rollback, but it is stopped and disabled.
 | 22/TCP | Open | Open after change and reboot |
 | 80/TCP | Closed | Closed after change and reboot |
 
-The final Cycle 02 Nmap scan against `192.168.244.10` found TCP port 22 open and 999 commonly scanned TCP ports closed.
+The final Cycle 03 Nmap scan against `192.168.244.10` found TCP port 22 open and 999 commonly scanned TCP ports closed.
+
+## SSH authentication standard
+
+| Setting | Verified state |
+|---|---|
+| Public-key authentication | Enabled |
+| Password authentication | Disabled |
+| Keyboard-interactive authentication | Disabled |
+| PAM | Enabled for account and session handling |
+| Remote access test | Key-only login successful after reboot |
+| Negative test | Password-only login rejected |
+
+Authentication hardening changed how SSH validates users but did not add another listening service or port.
