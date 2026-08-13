@@ -6,7 +6,10 @@ This is a self-directed lab project. It does not represent professional employme
 
 ## Current status
 
-PDCA Cycle 01 is complete. A temporary Apache HTTP service was introduced to simulate an undocumented legacy service. External scans confirmed that it opened TCP port 80. Apache was then stopped and disabled. Repeated tests and a reboot confirmed that required SSH access on TCP port 22 still worked while TCP port 80 remained closed.
+Two PDCA cycles are complete:
+
+- **Cycle 01:** A temporary Apache HTTP service simulated an undocumented legacy service. Apache was stopped and disabled after external testing confirmed the unnecessary TCP port 80 exposure. Required SSH access remained available after the change and reboot.
+- **Cycle 02:** The Ubuntu host-only interface was changed from a DHCP lease to the persistent static address `192.168.244.10/24`. Host-only connectivity, SSH, outbound NAT access, DNS resolution, routing, port exposure, and reboot persistence were verified.
 
 ## Lab topology
 
@@ -29,7 +32,9 @@ flowchart LR
 - [`docs/asset-inventory.md`](docs/asset-inventory.md): current hardware, operating-system, storage, and network inventory
 - [`docs/service-inventory.md`](docs/service-inventory.md): internal and externally observed services
 - [`docs/pdca/PDCA-01-apache-service-reduction.md`](docs/pdca/PDCA-01-apache-service-reduction.md): complete Plan, Do, Check, Act record
+- [`docs/pdca/PDCA-02-static-host-only-address.md`](docs/pdca/PDCA-02-static-host-only-address.md): static-address improvement and verification record
 - [`docs/runbooks/verify-host-only-connectivity.md`](docs/runbooks/verify-host-only-connectivity.md): standardized connectivity verification
+- [`docs/runbooks/configure-static-host-only-address.md`](docs/runbooks/configure-static-host-only-address.md): repeatable static-address configuration and recovery procedure
 - [`docs/change-log.md`](docs/change-log.md): chronological record of controlled changes
 - [`docs/security-considerations.md`](docs/security-considerations.md): isolation, evidence-sanitization, and remaining risks
 
@@ -50,4 +55,4 @@ Public evidence will be sanitized before it is added. Passwords, authentication 
 
 ## Next improvement
 
-The next cycle has not been selected. Possible candidates will be evaluated against a real observed need rather than added only to make the lab larger.
+The next cycle has not been selected. Candidates will be evaluated against an observed need, risk, or repeatability gap rather than added only to make the lab larger.

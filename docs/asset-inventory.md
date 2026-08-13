@@ -38,11 +38,11 @@ Observed during the initial lab build on August 12 and 13, 2026.
 | Interface | Purpose | Observed address | Addressing |
 |---|---|---|---|
 | `enp0s3` | Controlled outbound access through VirtualBox NAT | `10.0.2.15/24` | DHCP |
-| `enp0s8` | Isolated host-only lab traffic | `192.168.244.100/24` | VirtualBox DHCP |
+| `enp0s8` | Isolated host-only lab traffic | `192.168.244.10/24` | Static `systemd-networkd` configuration |
 | Windows host-only adapter | Windows endpoint on isolated lab network | `192.168.244.1/24` | Manually configured by VirtualBox |
 | VirtualBox DHCP server | Address assignment for host-only guests | `192.168.244.2/24` | VirtualBox configuration |
 
-The host-only DHCP pool is `192.168.244.100` through `192.168.244.200`.
+The host-only DHCP pool remains `192.168.244.100` through `192.168.244.200`. The Ubuntu static address `.10` is outside that pool to avoid conflicts.
 
 ## Routing observations
 

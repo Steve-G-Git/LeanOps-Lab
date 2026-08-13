@@ -40,7 +40,7 @@ The first milestone uses the smallest viable environment:
 
 - Intentionally insecure configurations must remain inside the isolated virtual lab.
 - NAT port forwarding is not configured.
-- Tests target only `192.168.244.100`, the owned Ubuntu lab VM.
+- Tests target only `192.168.244.10`, the owned Ubuntu lab VM.
 - Passwords, keys, tokens, fingerprints, real home-network details, and personal identifiers are excluded from public documentation.
 - Risky changes require a rollback method before execution.
 

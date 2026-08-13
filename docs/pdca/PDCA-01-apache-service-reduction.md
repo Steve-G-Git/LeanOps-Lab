@@ -121,6 +121,8 @@ Test-NetConnection 192.168.244.100 -Port 22
 ssh leanopsadmin@192.168.244.100
 ```
 
+These commands record the DHCP address used when Cycle 01 was completed. Cycle 02 replaced it with the current static address `192.168.244.10`.
+
 ### Recovery procedure
 
 If HTTP service becomes required and the change is approved:
@@ -134,10 +136,10 @@ Then repeat internal socket inspection, HTTP testing, Nmap scanning, and SSH tes
 ### Remaining risks
 
 - SSH currently permits password authentication in the isolated lab.
-- The host-only address is assigned by DHCP rather than reserved by MAC address.
+- At the close of Cycle 01, the host-only address was assigned by DHCP. Cycle 02 resolved this risk with a controlled static address.
 - NAT remains enabled for updates and should be reviewed before deliberately testing riskier services.
 - Raw screenshots still require sanitization before publication.
 
 ### Possible next improvement
 
-Select the next change from an observed need. Candidates include SSH authentication hardening, formal DHCP reservation or controlled static addressing, configuration backup verification, or firewall rule evaluation.
+Cycle 02 selected controlled static addressing from this list and completed it. Remaining candidates include SSH authentication hardening, configuration backup verification, or firewall rule evaluation.

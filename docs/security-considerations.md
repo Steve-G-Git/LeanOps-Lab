@@ -30,7 +30,7 @@ The fictional lab addresses `10.0.2.0/24` and `192.168.244.0/24` may be document
 ## Known constraints and remaining risks
 
 - Proton VPN blocked the host-only connection during testing. Current standard work requires disconnecting it during lab access.
-- The host-only VM address is assigned by DHCP and may change within the configured pool.
+- The host-only VM uses static address `192.168.244.10/24`, outside the VirtualBox DHCP pool. Configuration changes must preserve the lack of a default gateway on this interface.
 - SSH password authentication could be replaced with key authentication in a future controlled cycle.
 - The NAT adapter should be disconnected before any future exercise that intentionally creates a higher-risk service condition.
 - Installed but disabled Apache packages still require updates while retained for rollback.

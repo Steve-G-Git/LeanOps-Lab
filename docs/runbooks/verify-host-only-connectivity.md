@@ -7,7 +7,7 @@ Confirm that the Windows host and Ubuntu VM can communicate through the isolated
 ## Expected standard
 
 - Windows host-only address: `192.168.244.1/24`
-- Ubuntu host-only address: within `192.168.244.100-200/24`
+- Ubuntu host-only address: `192.168.244.10/24`
 - Ubuntu interface: `enp0s8`
 - SSH: reachable on TCP port 22
 - Proton VPN: disconnected for the current verified configuration
@@ -26,7 +26,7 @@ Expected relevant lines:
 
 ```text
 enp0s3  UP  10.0.2.15/24
-enp0s8  UP  192.168.244.x/24
+enp0s8  UP  192.168.244.10/24
 ```
 
 ### 2. Confirm Ubuntu routing
@@ -51,11 +51,11 @@ Expected: four replies with zero percent packet loss.
 
 ### 4. Test Windows to Ubuntu
 
-In PowerShell, substitute Ubuntu's observed host-only address if it is not `.100`:
+In PowerShell:
 
 ```powershell
-ping 192.168.244.100
-Test-NetConnection 192.168.244.100 -Port 22
+ping 192.168.244.10
+Test-NetConnection 192.168.244.10 -Port 22
 ```
 
 Expected: ping replies and `TcpTestSucceeded : True`.
@@ -63,7 +63,7 @@ Expected: ping replies and `TcpTestSucceeded : True`.
 ### 5. Test SSH login
 
 ```powershell
-ssh leanopsadmin@192.168.244.100
+ssh leanopsadmin@192.168.244.10
 ```
 
 Expected prompt:
@@ -107,4 +107,4 @@ An active `ssh.socket` and a listener on TCP 22 indicate SSH is available even w
 
 ## Recovery
 
-If network settings become uncertain, restore VirtualBox snapshot `02-HostOnlyNetworkVerified` or a later verified snapshot and repeat this runbook.
+If network settings become uncertain, restore VirtualBox snapshot `05-PDCA02-StaticAddressVerified` and repeat this runbook. Snapshot `04-PDCA02-PreStaticAddress` preserves the earlier DHCP baseline.
