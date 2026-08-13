@@ -77,14 +77,33 @@ The backup process does not add a listening service or network port.
 
 | Control | Verified state |
 |---|---|
-| Source definition | Root-controlled seven-file allowlist |
+| Source definition | Root-controlled eight-file allowlist |
 | Backup destination | `/var/backups/leanops` with mode `700` |
 | Backup artifacts | Archive, manifest, and SHA-256 checksum with mode `600` |
 | Scope validation | Approved regular files only; symbolic-link sources rejected |
-| Archive inspection | Exactly seven expected paths listed |
-| Isolated restore | Seven byte-for-byte content matches |
-| Restored metadata | Seven ownership and permission matches |
+| Archive inspection | Exactly eight expected paths listed |
+| Isolated restore | Eight byte-for-byte content matches |
+| Restored metadata | Eight ownership and permission matches |
 | Off-VM verification | SHA-256 comparison passed on Windows |
 | Post-reboot state | Script, allowlist, protected archive, SSH, UFW, networking, and DNS verified |
 
 This is a selected-configuration recovery control, not a complete server or disaster-recovery backup.
+
+## Operational health-check standard
+
+The health check does not add a listening service or scheduled background process. It runs on demand with `sudo`.
+
+| Check | Required interpretation |
+|---|---|
+| SSH | Active, otherwise FAIL |
+| Apache | Inactive, otherwise FAIL |
+| UFW | Active with documented defaults and restricted TCP 22 rule, otherwise FAIL |
+| Host-only address | `192.168.244.10/24` present on `enp0s8`, otherwise FAIL |
+| Default route | Present through NAT interface `enp0s3`, otherwise FAIL |
+| Internet and DNS | Reachable and resolvable, otherwise FAIL |
+| Root filesystem | WARN at 80%; FAIL at 90% |
+| Available memory | WARN below 20%; FAIL below 10% |
+| Package updates | WARN when the current APT cache lists updates |
+| Latest backup | SHA-256 verification required, otherwise FAIL |
+
+Exit code `0` means all checks passed, `1` means at least one warning and no failures, and `2` means at least one failure.

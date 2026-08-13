@@ -6,9 +6,9 @@ This is a self-directed lab project. It does not represent professional employme
 
 ## Current status
 
-**Status: Active development, 5 PDCA cycles completed**
+**Status: Active development, 6 PDCA cycles completed**
 
-Cycle 05 established a protected, allowlist-based configuration backup and verified it through checksum validation, isolated restoration, metadata comparison, off-VM transfer, and reboot testing.
+Cycle 06 established a repeatable server health check with severity labels, meaningful exit codes, a controlled failure test, automatic rollback, and reboot verification.
 
 ## Verified outcomes
 
@@ -19,6 +19,7 @@ Cycle 05 established a protected, allowlist-based configuration backup and verif
 | 03 | SSH allowed password authentication | Established key authentication and disabled SSH passwords | Key access persisted; password-only access was rejected; port baseline retained |
 | 04 | No active host firewall | Enabled UFW with default-deny inbound policy and source-restricted SSH | Approved SSH persisted; 999 other common TCP ports changed from closed to filtered |
 | 05 | Recovery depended on VM snapshots | Created a protected, portable configuration backup process | Seven approved files restored byte-for-byte with matching metadata; Ubuntu and Windows checksum tests passed |
+| 06 | Server health required separate manual checks | Created a root-controlled health-check script | Normal state returned 12 PASS, 1 WARN, 0 FAIL; controlled Apache failure returned exit code 2 and rolled back safely |
 
 ## Skills demonstrated
 
@@ -32,6 +33,9 @@ Cycle 05 established a protected, allowlist-based configuration backup and verif
 - SHA-256 integrity verification
 - Isolated configuration restoration
 - Backup scope and permission control
+- Bash health-check scripting
+- Operational thresholds and exit codes
+- Controlled failure testing and automatic rollback
 - VirtualBox networking
 - Controlled change management
 - Troubleshooting documentation
@@ -62,11 +66,13 @@ flowchart LR
 - [`docs/pdca/PDCA-03-ssh-key-authentication.md`](docs/pdca/PDCA-03-ssh-key-authentication.md): key-authentication and SSH-hardening record
 - [`docs/pdca/PDCA-04-ufw-host-firewall.md`](docs/pdca/PDCA-04-ufw-host-firewall.md): host-firewall configuration and verification record
 - [`docs/pdca/PDCA-05-configuration-backup.md`](docs/pdca/PDCA-05-configuration-backup.md): protected configuration-backup and isolated-restore record
+- [`docs/pdca/PDCA-06-server-health-check.md`](docs/pdca/PDCA-06-server-health-check.md): repeatable health check, warning state, controlled failure, and rollback record
 - [`docs/runbooks/verify-host-only-connectivity.md`](docs/runbooks/verify-host-only-connectivity.md): standardized connectivity verification
 - [`docs/runbooks/configure-static-host-only-address.md`](docs/runbooks/configure-static-host-only-address.md): repeatable static-address configuration and recovery procedure
 - [`docs/runbooks/configure-ssh-key-authentication.md`](docs/runbooks/configure-ssh-key-authentication.md): safe key setup, hardening, verification, and recovery procedure
 - [`docs/runbooks/configure-ufw-host-firewall.md`](docs/runbooks/configure-ufw-host-firewall.md): source-restricted firewall setup, testing, and recovery procedure
 - [`docs/runbooks/backup-and-restore-configuration.md`](docs/runbooks/backup-and-restore-configuration.md): repeatable backup, integrity verification, isolated restore, and controlled live recovery procedure
+- [`docs/runbooks/run-server-health-check.md`](docs/runbooks/run-server-health-check.md): health-check execution, interpretation, escalation, and recovery procedure
 - [`docs/change-log.md`](docs/change-log.md): chronological record of controlled changes
 - [`docs/security-considerations.md`](docs/security-considerations.md): isolation, evidence-sanitization, and remaining risks
 
@@ -87,4 +93,4 @@ Public evidence will be sanitized before it is added. Passwords, authentication 
 
 ## Next improvement
 
-Cycle 06 will build a repeatable health-check script for SSH, UFW, addressing, DNS, disk, memory, and update state. Snapshot `11-PDCA05-ConfigBackupVerified` is the current recovery point.
+Cycle 07 will standardize incident evidence collection and relevant log review. Snapshot `13-PDCA06-HealthCheckVerified` is the current recovery point.

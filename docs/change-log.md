@@ -15,6 +15,9 @@
 | 2026-08-13 | Restricted the UFW SSH rule to source `192.168.244.1` | Limit SSH admission to the Windows host-only administrative endpoint | Fresh and post-reboot SSH connections succeeded from the approved source; no unrestricted TCP 22 rule was present | Delete the restricted rule from the local console after establishing an approved replacement, or restore `08-PDCA04-PreUFW` |
 | 2026-08-13 | Added a root-controlled allowlist and configuration-backup script | Reduce reliance on VM snapshots and make critical configuration recovery repeatable | Script syntax passed; exactly seven approved regular files entered the archive; archive listing and SHA-256 verification passed | Remove `/etc/leanops-backup-files`, `/usr/local/sbin/leanops-config-backup`, and `/var/backups/leanops`, or restore `10-PDCA05-PreConfigBackup` |
 | 2026-08-13 | Performed isolated restoration and off-VM backup verification | Prove the package could be restored and remained intact after transfer | Seven restored files matched live sources byte-for-byte with matching ownership and permissions; Windows SHA-256 comparison passed; protected Ubuntu archive remained valid after reboot | Retain the verified server state and remove only unneeded test or export copies |
+| 2026-08-13 | Added root-controlled `leanops-health-check` script | Replace separate manual checks with one repeatable operational check | Normal state returned 12 PASS, 1 WARN, 0 FAIL with exit code 1; results persisted after reboot | Remove `/usr/local/sbin/leanops-health-check`, or restore `12-PDCA06-PreHealthCheck` |
+| 2026-08-13 | Temporarily started Apache to test failure detection | Prove the health check distinguishes a required-state failure from a warning | Script reported Apache failure and exit code 2; an EXIT trap stopped Apache; normal state was immediately reverified | Automatic cleanup stopped Apache; manual fallback is `sudo systemctl stop apache2` |
+| 2026-08-13 | Expanded the configuration backup from seven to eight files | Protect the health-check script with the existing recovery process | Eight-file archive passed checksum, scope, isolated content, metadata, Windows checksum, and post-reboot health checks | Remove the health-check entry from `/etc/leanops-backup-files`, or restore `12-PDCA06-PreHealthCheck` |
 
 ## Snapshot checkpoints
 
@@ -32,3 +35,5 @@
 | `09-PDCA04-UFWVerified` | UFW active with default-deny inbound policy; SSH restricted to `192.168.244.1`; outbound access, DNS, and reboot persistence verified |
 | `10-PDCA05-PreConfigBackup` | Verified Cycle 04 state before adding the configuration-backup process |
 | `11-PDCA05-ConfigBackupVerified` | Protected seven-file backup, isolated restore, off-VM checksum verification, service state, networking, firewall policy, and reboot persistence verified |
+| `12-PDCA06-PreHealthCheck` | Healthy Cycle 05 baseline before adding the server health check |
+| `13-PDCA06-HealthCheckVerified` | Health-check normal, warning, and failure behavior; automatic rollback; eight-file recovery package; off-VM checksum; and reboot persistence verified |
