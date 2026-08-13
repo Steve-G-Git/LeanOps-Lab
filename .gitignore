@@ -1,0 +1,12 @@
+# Local evidence that has not been reviewed and sanitized
+evidence/raw/
+
+# Editor and operating-system files
+.vscode/
+.idea/
+Thumbs.db
+.DS_Store
+
+# Temporary files
+*.tmp
+*.log
