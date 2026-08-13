@@ -82,6 +82,22 @@ Verification correctly showed Apache as `active` and `enabled`. The mistake was 
 
 ## Check
 
+### Sanitized evidence summary
+
+This compact summary is derived from the observed test results. Identifying details and unrelated terminal output are omitted.
+
+```text
+TEMPORARY LEGACY CONDITION
+22/tcp open  ssh
+80/tcp open  http
+HTTP response: 200 OK
+
+IMPROVED CONDITION
+22/tcp open  ssh
+80/tcp closed
+SSH connectivity: successful after reboot
+```
+
 | Verification | Temporary legacy condition | Improved result |
 |---|---|---|
 | Apache runtime state | Active | Inactive |
@@ -105,6 +121,8 @@ The expected result was achieved without breaking the required SSH function.
 
 ### Standard verification
 
+The following commands are retained as **historical Cycle 01 evidence**. They use the former DHCP address and are not current operational instructions.
+
 On Ubuntu:
 
 ```bash
@@ -122,6 +140,8 @@ ssh leanopsadmin@192.168.244.100
 ```
 
 These commands record the DHCP address used when Cycle 01 was completed. Cycle 02 replaced it with the current static address `192.168.244.10`.
+
+For current operational instructions using `.10`, follow [`../runbooks/verify-host-only-connectivity.md`](../runbooks/verify-host-only-connectivity.md).
 
 ### Recovery procedure
 

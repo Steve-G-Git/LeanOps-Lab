@@ -6,10 +6,27 @@ This is a self-directed lab project. It does not represent professional employme
 
 ## Current status
 
-Two PDCA cycles are complete:
+**Status: Active development, 2 PDCA cycles completed**
 
-- **Cycle 01:** A temporary Apache HTTP service simulated an undocumented legacy service. Apache was stopped and disabled after external testing confirmed the unnecessary TCP port 80 exposure. Required SSH access remained available after the change and reboot.
-- **Cycle 02:** The Ubuntu host-only interface was changed from a DHCP lease to the persistent static address `192.168.244.10/24`. Host-only connectivity, SSH, outbound NAT access, DNS resolution, routing, port exposure, and reboot persistence were verified.
+Cycle 03 is in progress: establish and verify SSH key authentication before considering whether to disable password authentication.
+
+## Verified outcomes
+
+| Cycle | Problem | Improvement | Verified result |
+|---|---|---|---|
+| 01 | Unnecessary HTTP service | Stopped and disabled Apache | Port 80 closed; SSH retained after reboot |
+| 02 | Administration address could change | Assigned a static host-only address | Address, SSH, routing, DNS, and NAT persisted |
+
+## Skills demonstrated
+
+- Linux administration
+- TCP/IP and service validation
+- Nmap and PowerShell testing
+- SSH administration
+- VirtualBox networking
+- Controlled change management
+- Troubleshooting documentation
+- PDCA and standardized work
 
 ## Lab topology
 
@@ -53,6 +70,6 @@ flowchart LR
 
 Public evidence will be sanitized before it is added. Passwords, authentication material, real home-network information, personal usernames, unique system identifiers, and unnecessary MAC addresses will not be published.
 
-## Next improvement
+## Current improvement
 
-The next cycle has not been selected. Candidates will be evaluated against an observed need, risk, or repeatability gap rather than added only to make the lab larger.
+Cycle 03 is in progress. The current rollback point is snapshot `05-PDCA02-StaticAddressVerified`. Key authentication will be established and verified in a separate session before any decision is made about password authentication.

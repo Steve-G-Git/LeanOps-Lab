@@ -71,6 +71,24 @@ The key was corrected and the file was verified with line numbers before reloadi
 
 ## Check
 
+### Sanitized evidence summary
+
+This compact summary is derived from the observed test results. Unique identifiers and unrelated terminal output are omitted.
+
+```text
+BEFORE
+enp0s8: 192.168.244.100/24 via DHCP
+
+AFTER REBOOT
+enp0s8: 192.168.244.10/24 static
+default route: 10.0.2.2 via enp0s3
+22/tcp open  ssh
+999 commonly scanned TCP ports closed
+ping: 4 replies, 0% loss
+DNS resolution: successful
+SSH login: successful
+```
+
 | Test | Before | After | Result |
 |---|---|---|---|
 | `enp0s8` address | DHCP `192.168.244.100/24` | Static `192.168.244.10/24` | Passed |
