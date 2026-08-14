@@ -6,9 +6,9 @@ This is a self-directed lab project. It does not represent professional employme
 
 ## Current status
 
-**Status: Active development, 6 PDCA cycles completed**
+**Status: Active development, 7 PDCA cycles completed**
 
-Cycle 06 established a repeatable server health check with severity labels, meaningful exit codes, a controlled failure test, automatic rollback, and reboot verification.
+Cycle 07 established a protected incident-evidence collector that preserves limited health, service, firewall, network, resource, package, backup, journal, authentication, and UFW evidence in integrity-checked packages.
 
 ## Verified outcomes
 
@@ -20,6 +20,7 @@ Cycle 06 established a repeatable server health check with severity labels, mean
 | 04 | No active host firewall | Enabled UFW with default-deny inbound policy and source-restricted SSH | Approved SSH persisted; 999 other common TCP ports changed from closed to filtered |
 | 05 | Recovery depended on VM snapshots | Created a protected, portable configuration backup process | Seven approved files restored byte-for-byte with matching metadata; Ubuntu and Windows checksum tests passed |
 | 06 | Server health required separate manual checks | Created a root-controlled health-check script | Normal state returned 12 PASS, 1 WARN, 0 FAIL; controlled Apache failure returned exit code 2 and rolled back safely |
+| 07 | Incident evidence required manual collection | Created a sanitized, integrity-checked evidence collector | Healthy and controlled-failure packages verified; Apache failure preserved before automatic rollback; off-VM checks passed |
 
 ## Skills demonstrated
 
@@ -36,6 +37,9 @@ Cycle 06 established a repeatable server health check with severity labels, mean
 - Bash health-check scripting
 - Operational thresholds and exit codes
 - Controlled failure testing and automatic rollback
+- Incident evidence collection
+- Journal and authentication-log review
+- Evidence sanitization and integrity verification
 - VirtualBox networking
 - Controlled change management
 - Troubleshooting documentation
@@ -67,12 +71,14 @@ flowchart LR
 - [`docs/pdca/PDCA-04-ufw-host-firewall.md`](docs/pdca/PDCA-04-ufw-host-firewall.md): host-firewall configuration and verification record
 - [`docs/pdca/PDCA-05-configuration-backup.md`](docs/pdca/PDCA-05-configuration-backup.md): protected configuration-backup and isolated-restore record
 - [`docs/pdca/PDCA-06-server-health-check.md`](docs/pdca/PDCA-06-server-health-check.md): repeatable health check, warning state, controlled failure, and rollback record
+- [`docs/pdca/PDCA-07-incident-evidence-collection.md`](docs/pdca/PDCA-07-incident-evidence-collection.md): healthy baseline, controlled incident, evidence sanitization, and verification record
 - [`docs/runbooks/verify-host-only-connectivity.md`](docs/runbooks/verify-host-only-connectivity.md): standardized connectivity verification
 - [`docs/runbooks/configure-static-host-only-address.md`](docs/runbooks/configure-static-host-only-address.md): repeatable static-address configuration and recovery procedure
 - [`docs/runbooks/configure-ssh-key-authentication.md`](docs/runbooks/configure-ssh-key-authentication.md): safe key setup, hardening, verification, and recovery procedure
 - [`docs/runbooks/configure-ufw-host-firewall.md`](docs/runbooks/configure-ufw-host-firewall.md): source-restricted firewall setup, testing, and recovery procedure
 - [`docs/runbooks/backup-and-restore-configuration.md`](docs/runbooks/backup-and-restore-configuration.md): repeatable backup, integrity verification, isolated restore, and controlled live recovery procedure
 - [`docs/runbooks/run-server-health-check.md`](docs/runbooks/run-server-health-check.md): health-check execution, interpretation, escalation, and recovery procedure
+- [`docs/runbooks/collect-incident-evidence.md`](docs/runbooks/collect-incident-evidence.md): protected evidence collection, validation, interpretation, export, and cleanup procedure
 - [`docs/change-log.md`](docs/change-log.md): chronological record of controlled changes
 - [`docs/security-considerations.md`](docs/security-considerations.md): isolation, evidence-sanitization, and remaining risks
 
@@ -93,4 +99,4 @@ Public evidence will be sanitized before it is added. Passwords, authentication 
 
 ## Next improvement
 
-Cycle 07 will standardize incident evidence collection and relevant log review. Snapshot `13-PDCA06-HealthCheckVerified` is the current recovery point.
+Cycle 08 will run an end-to-end incident-response drill using the standardized health check, evidence collector, recovery controls, and documented verification steps. Snapshot `15-PDCA07-IncidentEvidenceVerified` is the current recovery point.

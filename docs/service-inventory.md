@@ -77,13 +77,13 @@ The backup process does not add a listening service or network port.
 
 | Control | Verified state |
 |---|---|
-| Source definition | Root-controlled eight-file allowlist |
+| Source definition | Root-controlled nine-file allowlist |
 | Backup destination | `/var/backups/leanops` with mode `700` |
 | Backup artifacts | Archive, manifest, and SHA-256 checksum with mode `600` |
 | Scope validation | Approved regular files only; symbolic-link sources rejected |
-| Archive inspection | Exactly eight expected paths listed |
-| Isolated restore | Eight byte-for-byte content matches |
-| Restored metadata | Eight ownership and permission matches |
+| Archive inspection | Exactly nine expected paths listed |
+| Isolated restore | Nine byte-for-byte content matches |
+| Restored metadata | Nine ownership and permission matches |
 | Off-VM verification | SHA-256 comparison passed on Windows |
 | Post-reboot state | Script, allowlist, protected archive, SSH, UFW, networking, and DNS verified |
 
@@ -107,3 +107,24 @@ The health check does not add a listening service or scheduled background proces
 | Latest backup | SHA-256 verification required, otherwise FAIL |
 
 Exit code `0` means all checks passed, `1` means at least one warning and no failures, and `2` means at least one failure.
+
+## Incident-evidence collection standard
+
+The collector runs on demand and does not add a listening port or scheduled service.
+
+| Control | Verified state |
+|---|---|
+| Output directory | `/var/log/leanops-incidents`, mode `700 root:root` |
+| Collector | `/usr/local/sbin/leanops-incident-collect`, mode `700 root:root` |
+| Evidence scope | 12 defined text sources plus one manifest |
+| Journal window | SSH and Apache events from the previous 30 minutes |
+| Authentication scope | Up to 100 recent `sshd` log entries |
+| UFW scope | Up to 100 recent UFW log entries |
+| Sanitization | MAC addresses and UFW `SRC` and `DST` fields replaced |
+| Integrity | SHA-256 checksum for every archive |
+| Healthy collection | 12 PASS, 1 WARN, 0 FAIL embedded in package |
+| Controlled incident | Apache failure, health exit code 2, active service state, and start event preserved |
+| Recovery | EXIT trap restored Apache to inactive |
+| Off-VM verification | Configuration and controlled-incident packages passed on Windows |
+
+The collector supports local incident triage and evidence preservation. It is not centralized logging, monitoring, or a security information and event management platform.
