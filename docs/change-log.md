@@ -22,6 +22,10 @@
 | 2026-08-14 | Captured a controlled Apache-active incident with automatic rollback | Prove the package preserves a detected failure, service state, and journal event before recovery | Package recorded 11 PASS, 1 WARN, 1 FAIL, health exit code 2, active service evidence, and an Apache start event; EXIT trap restored Apache to inactive | Automatic cleanup stopped Apache; manual fallback is `sudo systemctl stop apache2` |
 | 2026-08-14 | Expanded configuration recovery from eight to nine files and exported verified Cycle 07 packages | Protect the collector and retain evidence outside the VM | Nine-file content and metadata restore passed; configuration and controlled-incident archives passed Windows SHA-256 verification; collector passed after reboot | Remove the collector entry from the allowlist, or restore `14-PDCA07-PreIncidentEvidence` |
 
+| 2026-08-14 | Removed the VirtualBox NAT default route as a controlled incident | Test the completed health-check and evidence controls through a network failure while preserving host-only administration | Health check reported 10 PASS, 1 WARN, 2 FAIL with exit code 2; evidence showed both interfaces present but no default route | Reconfigure `enp0s3`, reboot if required, or restore `16-PDCA08-PreIncidentDrill` |
+| 2026-08-14 | Recovered the NAT route with `networkctl reconfigure enp0s3` | Restore DHCP-managed routing after lease renewal did not correct the failure | Default route, internet reachability, normal health state, and a fresh key-only SSH session passed | Reboot, inspect networkd state, or restore `16-PDCA08-PreIncidentDrill` |
+| 2026-08-14 | Verified and exported four Cycle 08 evidence states | Preserve the full baseline, failure, recovery, and post-reboot response record outside the VM | All four archives passed Ubuntu and Windows SHA-256 verification; post-reboot health returned 12 PASS, 1 WARN, 0 FAIL | Retain protected originals and verified Windows copies; remove only temporary export data |
+
 ## Snapshot checkpoints
 
 | Snapshot | Verified condition |
@@ -42,3 +46,5 @@
 | `13-PDCA06-HealthCheckVerified` | Health-check normal, warning, and failure behavior; automatic rollback; eight-file recovery package; off-VM checksum; and reboot persistence verified |
 | `14-PDCA07-PreIncidentEvidence` | Logging services, persistent journal, restricted authentication and UFW logs, and completed Cycle 06 state verified before the collector |
 | `15-PDCA07-IncidentEvidenceVerified` | Healthy and controlled incident packages, sanitization, failure evidence, rollback, nine-file recovery, off-VM verification, and reboot persistence verified |
+| `16-PDCA08-PreIncidentDrill` | Healthy baseline, NAT and host-only addressing, default route, health check, evidence collector, and completed Cycle 07 state verified before the route-failure drill |
+| `17-PDCA08-IncidentResponseVerified` | Controlled route failure detected and preserved; staged recovery, fresh SSH, four evidence states, off-VM verification, and reboot persistence passed |

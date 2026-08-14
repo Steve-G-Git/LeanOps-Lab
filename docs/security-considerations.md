@@ -52,6 +52,17 @@
 - The collector records command exit codes, allowing unavailable or failed evidence sources to remain visible.
 - The collector script is included in the nine-file configuration backup.
 
+## Incident-response controls
+
+- Controlled network-failure testing is performed only in the isolated VM after a healthy baseline and recovery snapshot are verified.
+- The host-only administration path is kept separate from the NAT route under test.
+- Evidence is collected before recovery whenever access and safety permit.
+- Diagnosis compares interface state, connected routes, the default route, service health, and firewall state before selecting a corrective action.
+- Recovery actions are attempted one at a time in the order DHCP renewal, interface reconfiguration, reboot, then snapshot restoration.
+- A failed recovery step is recorded rather than hidden by an unrelated configuration change.
+- Recovery is not complete until the health check passes without failures, a fresh key-only SSH session succeeds, and the state persists after reboot.
+- Required evidence is transferred off the VM and independently verified with SHA-256 before temporary export data is removed.
+
 ## Evidence sanitization
 
 Before publication, screenshots and copied output must be checked for:
@@ -82,3 +93,5 @@ The fictional lab addresses `10.0.2.0/24` and `192.168.244.0/24` may be document
 - Incident archives can still contain operational details such as service names, package names, fictional lab addresses, timestamps, and authentication outcomes. They remain protected and are not published raw.
 - Sanitization covers the observed MAC, UFW address-field, and generated local IPv6 risks. It is not a universal data-loss-prevention system.
 - The collector packages local evidence on demand. It does not provide centralized logging, tamper-resistant remote storage, alerting, or continuous monitoring.
+- Successful DNS resolution during a short route failure may reflect cached resolver state and does not prove full outbound connectivity.
+- Reconfiguring a network interface can briefly interrupt traffic on that interface and requires an independent administrative path or console fallback.
