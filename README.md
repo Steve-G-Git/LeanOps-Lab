@@ -6,9 +6,9 @@ This is a self-directed lab project. It does not represent professional employme
 
 ## Current status
 
-**Status: Active development, 7 PDCA cycles completed**
+**Status: Active development, 8 PDCA cycles completed**
 
-Cycle 07 established a protected incident-evidence collector that preserves limited health, service, firewall, network, resource, package, backup, journal, authentication, and UFW evidence in integrity-checked packages.
+Cycle 08 completed an end-to-end incident-response drill by creating a controlled missing-default-route failure, preserving evidence, diagnosing the routing fault, recovering the NAT interface, and verifying fresh SSH access, reboot persistence, and four off-VM checksums.
 
 ## Verified outcomes
 
@@ -21,6 +21,7 @@ Cycle 07 established a protected incident-evidence collector that preserves limi
 | 05 | Recovery depended on VM snapshots | Created a protected, portable configuration backup process | Seven approved files restored byte-for-byte with matching metadata; Ubuntu and Windows checksum tests passed |
 | 06 | Server health required separate manual checks | Created a root-controlled health-check script | Normal state returned 12 PASS, 1 WARN, 0 FAIL; controlled Apache failure returned exit code 2 and rolled back safely |
 | 07 | Incident evidence required manual collection | Created a sanitized, integrity-checked evidence collector | Healthy and controlled-failure packages verified; Apache failure preserved before automatic rollback; off-VM checks passed |
+| 08 | Detection and evidence controls had not been tested through a complete network incident | Ran a controlled missing-default-route response drill | Failure detected and preserved; route-level cause isolated; staged recovery, fresh SSH, reboot persistence, and four Windows checksums passed |
 
 ## Skills demonstrated
 
@@ -38,6 +39,8 @@ Cycle 07 established a protected incident-evidence collector that preserves limi
 - Operational thresholds and exit codes
 - Controlled failure testing and automatic rollback
 - Incident evidence collection
+- Incident response and staged network recovery
+- Route and interface diagnosis
 - Journal and authentication-log review
 - Evidence sanitization and integrity verification
 - VirtualBox networking
@@ -72,6 +75,7 @@ flowchart LR
 - [`docs/pdca/PDCA-05-configuration-backup.md`](docs/pdca/PDCA-05-configuration-backup.md): protected configuration-backup and isolated-restore record
 - [`docs/pdca/PDCA-06-server-health-check.md`](docs/pdca/PDCA-06-server-health-check.md): repeatable health check, warning state, controlled failure, and rollback record
 - [`docs/pdca/PDCA-07-incident-evidence-collection.md`](docs/pdca/PDCA-07-incident-evidence-collection.md): healthy baseline, controlled incident, evidence sanitization, and verification record
+- [`docs/pdca/PDCA-08-controlled-incident-response.md`](docs/pdca/PDCA-08-controlled-incident-response.md): controlled route failure, evidence-led diagnosis, staged recovery, and persistence record
 - [`docs/runbooks/verify-host-only-connectivity.md`](docs/runbooks/verify-host-only-connectivity.md): standardized connectivity verification
 - [`docs/runbooks/configure-static-host-only-address.md`](docs/runbooks/configure-static-host-only-address.md): repeatable static-address configuration and recovery procedure
 - [`docs/runbooks/configure-ssh-key-authentication.md`](docs/runbooks/configure-ssh-key-authentication.md): safe key setup, hardening, verification, and recovery procedure
@@ -79,6 +83,7 @@ flowchart LR
 - [`docs/runbooks/backup-and-restore-configuration.md`](docs/runbooks/backup-and-restore-configuration.md): repeatable backup, integrity verification, isolated restore, and controlled live recovery procedure
 - [`docs/runbooks/run-server-health-check.md`](docs/runbooks/run-server-health-check.md): health-check execution, interpretation, escalation, and recovery procedure
 - [`docs/runbooks/collect-incident-evidence.md`](docs/runbooks/collect-incident-evidence.md): protected evidence collection, validation, interpretation, export, and cleanup procedure
+- [`docs/runbooks/respond-to-missing-default-route.md`](docs/runbooks/respond-to-missing-default-route.md): evidence-first diagnosis, staged recovery, and verification for a missing IPv4 default route
 - [`docs/change-log.md`](docs/change-log.md): chronological record of controlled changes
 - [`docs/security-considerations.md`](docs/security-considerations.md): isolation, evidence-sanitization, and remaining risks
 
@@ -99,4 +104,4 @@ Public evidence will be sanitized before it is added. Passwords, authentication 
 
 ## Next improvement
 
-Cycle 08 will run an end-to-end incident-response drill using the standardized health check, evidence collector, recovery controls, and documented verification steps. Snapshot `15-PDCA07-IncidentEvidenceVerified` is the current recovery point.
+Cycle 09 will build on the verified incident-response process without weakening the current access, firewall, backup, health-check, or evidence controls. Snapshot `17-PDCA08-IncidentResponseVerified` is the current recovery point.
