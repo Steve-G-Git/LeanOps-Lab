@@ -77,13 +77,13 @@ The backup process does not add a listening service or network port.
 
 | Control | Verified state |
 |---|---|
-| Source definition | Root-controlled nine-file allowlist |
+| Source definition | Root-controlled eleven-file allowlist |
 | Backup destination | `/var/backups/leanops` with mode `700` |
 | Backup artifacts | Archive, manifest, and SHA-256 checksum with mode `600` |
 | Scope validation | Approved regular files only; symbolic-link sources rejected |
-| Archive inspection | Exactly nine expected paths listed |
-| Isolated restore | Nine byte-for-byte content matches |
-| Restored metadata | Nine ownership and permission matches |
+| Archive inspection | Exactly eleven expected paths listed |
+| Isolated restore | Eleven byte-for-byte content matches |
+| Restored metadata | Eleven ownership and permission matches |
 | Off-VM verification | SHA-256 comparison passed on Windows |
 | Post-reboot state | Script, allowlist, protected archive, SSH, UFW, networking, and DNS verified |
 
@@ -91,7 +91,7 @@ This is a selected-configuration recovery control, not a complete server or disa
 
 ## Operational health-check standard
 
-The health check does not add a listening service or scheduled background process. It runs on demand with `sudo`.
+The health check does not add a listening network service. It can run on demand with `sudo` or through the scheduled systemd service and timer.
 
 | Check | Required interpretation |
 |---|---|
@@ -106,7 +106,25 @@ The health check does not add a listening service or scheduled background proces
 | Package updates | WARN when the current APT cache lists updates |
 | Latest backup | SHA-256 verification required, otherwise FAIL |
 
+
 Exit code `0` means all checks passed, `1` means at least one warning and no failures, and `2` means at least one failure.
+
+## Scheduled health-monitoring standard
+
+The health check remains available on demand and also runs through a root-owned systemd oneshot service. A persistent timer schedules recurring execution without adding a listening network port.
+
+| Control | Verified state |
+|---|---|
+| Service | `leanops-health-monitor.service`, oneshot, `644 root:root` |
+| Timer | `leanops-health-monitor.timer`, enabled and active |
+| Schedule | Five minutes after boot and approximately every 15 minutes |
+| Warning handling | Exit code `1` accepted as a successful service run |
+| Failure handling | Exit code `2` retains a failed service state |
+| Logging | Standard output and errors recorded in the system journal |
+| Hardening | `NoNewPrivileges`, `PrivateTmp`, `ProtectHome`, and `ProtectSystem=full` |
+| Controlled test | Apache failure detected; evidence preserved; EXIT trap restored Apache and timer |
+| Reboot verification | Timer remained enabled and active; automatic health run completed |
+| Recovery coverage | Service and timer included in the eleven-file configuration backup |
 
 ## Incident-evidence collection standard
 
