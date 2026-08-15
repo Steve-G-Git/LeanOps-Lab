@@ -22,7 +22,7 @@
 ## Configuration backup controls
 
 - `/var/backups/leanops` is owned by `root:root` with mode `700`.
-- The root-controlled allowlist has mode `600` and limits each archive to nine approved regular files.
+- The root-controlled allowlist has mode `600` and limits each archive to eleven approved regular files.
 - The backup script has mode `700` and rejects absolute paths, parent-directory traversal, missing files, and symbolic-link sources.
 - Archives, manifests, and checksum files have mode `600`.
 - Backup scope excludes private SSH keys, `authorized_keys`, password databases, logs, and machine-specific identifiers.
@@ -37,7 +37,19 @@
 - Output reports only operational status, percentages, counts, and fictional lab addresses. It does not display configuration contents or checksum values.
 - Required-state failures return exit code `2`; warnings return `1`; an all-pass result returns `0`.
 - A controlled Apache failure was protected by an EXIT trap that restored the required inactive state.
-- The health-check script is included in the nine-file configuration backup.
+- The health-check script and both scheduled-monitoring unit files are included in the eleven-file configuration backup.
+
+## Scheduled-monitoring controls
+
+- `leanops-health-monitor.service` is a root-owned oneshot unit; `leanops-health-monitor.timer` is enabled and persistent.
+- The timer runs approximately every 15 minutes and schedules its first post-boot run after five minutes.
+- `SuccessExitStatus=1` treats warning-only results as successful without accepting failure exit code `2`.
+- Output and errors are recorded in the system journal.
+- `NoNewPrivileges=true`, `PrivateTmp=true`, and `ProtectHome=true` reduce service exposure.
+- `ProtectSystem=full` keeps `/usr`, `/boot`, and `/etc` read-only while allowing UFW's required runtime lock under `/run`.
+- Controlled failure testing pauses the timer and uses an EXIT trap to stop Apache and restart scheduling.
+- Both unit files are protected by the eleven-source configuration backup.
+- Reboot verification confirms timer enablement, activation, and automatic execution.
 
 ## Incident-evidence controls
 
@@ -50,7 +62,7 @@
 - IPv4-only interface and route commands avoid collecting generated interface IPv6 addresses.
 - Every evidence archive receives a manifest and SHA-256 checksum, and all artifacts have mode `600`.
 - The collector records command exit codes, allowing unavailable or failed evidence sources to remain visible.
-- The collector script is included in the nine-file configuration backup.
+- The collector script is included in the eleven-file configuration backup.
 
 ## Incident-response controls
 
@@ -92,6 +104,6 @@ The fictional lab addresses `10.0.2.0/24` and `192.168.244.0/24` may be document
 - The internet check depends on ICMP replies from `1.1.1.1`; an upstream ICMP policy could produce a failure even when other outbound traffic works.
 - Incident archives can still contain operational details such as service names, package names, fictional lab addresses, timestamps, and authentication outcomes. They remain protected and are not published raw.
 - Sanitization covers the observed MAC, UFW address-field, and generated local IPv6 risks. It is not a universal data-loss-prevention system.
-- The collector packages local evidence on demand. It does not provide centralized logging, tamper-resistant remote storage, alerting, or continuous monitoring.
+- The collector packages local evidence on demand. It does not provide centralized logging or tamper-resistant remote storage.\n- Scheduled monitoring records local status but does not currently send remote alerts or automatically collect evidence.
 - Successful DNS resolution during a short route failure may reflect cached resolver state and does not prove full outbound connectivity.
 - Reconfiguring a network interface can briefly interrupt traffic on that interface and requires an independent administrative path or console fallback.
