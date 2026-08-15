@@ -21,7 +21,8 @@ Cycle 09 converted the manual server health check into a persistent systemd serv
 | 05 | Recovery depended on VM snapshots | Created a protected, portable configuration backup process | Seven approved files restored byte-for-byte with matching metadata; Ubuntu and Windows checksum tests passed |
 | 06 | Server health required separate manual checks | Created a root-controlled health-check script | Normal state returned 12 PASS, 1 WARN, 0 FAIL; controlled Apache failure returned exit code 2 and rolled back safely |
 | 07 | Incident evidence required manual collection | Created a sanitized, integrity-checked evidence collector | Healthy and controlled-failure packages verified; Apache failure preserved before automatic rollback; off-VM checks passed |
-| 08 | Detection and evidence controls had not been tested through a complete network incident | Ran a controlled missing-default-route response drill | Failure detected and preserved; route-level cause isolated; staged recovery, fresh SSH, reboot persistence, and four Windows checksums passed |\n| 09 | Health checks depended on manual execution | Added a hardened oneshot service and persistent 15-minute systemd timer | Warning and failure semantics, journal records, controlled detection, rollback, backup recovery, automatic execution, and reboot persistence passed |
+| 08 | Detection and evidence controls had not been tested through a complete network incident | Ran a controlled missing-default-route response drill | Failure detected and preserved; route-level cause isolated; staged recovery, fresh SSH, reboot persistence, and four Windows checksums passed |
+| 09 | Health checks depended on manual execution | Added a hardened oneshot service and persistent 15-minute systemd timer | Warning and failure semantics, journal records, controlled detection, rollback, backup recovery, automatic execution, and reboot persistence passed |
 
 ## Skills demonstrated
 
@@ -39,7 +40,9 @@ Cycle 09 converted the manual server health check into a persistent systemd serv
 - Operational thresholds and exit codes
 - Controlled failure testing and automatic rollback
 - Incident evidence collection
-- Incident response and staged network recovery\n- systemd service and timer administration\n- Scheduled monitoring and journal review
+- Incident response and staged network recovery
+- systemd service and timer administration
+- Scheduled monitoring and journal review
 - Route and interface diagnosis
 - Journal and authentication-log review
 - Evidence sanitization and integrity verification
@@ -75,7 +78,8 @@ flowchart LR
 - [`docs/pdca/PDCA-05-configuration-backup.md`](docs/pdca/PDCA-05-configuration-backup.md): protected configuration-backup and isolated-restore record
 - [`docs/pdca/PDCA-06-server-health-check.md`](docs/pdca/PDCA-06-server-health-check.md): repeatable health check, warning state, controlled failure, and rollback record
 - [`docs/pdca/PDCA-07-incident-evidence-collection.md`](docs/pdca/PDCA-07-incident-evidence-collection.md): healthy baseline, controlled incident, evidence sanitization, and verification record
-- [`docs/pdca/PDCA-08-controlled-incident-response.md`](docs/pdca/PDCA-08-controlled-incident-response.md): controlled route failure, evidence-led diagnosis, staged recovery, and persistence record\n- [`docs/pdca/PDCA-09-scheduled-health-monitoring.md`](docs/pdca/PDCA-09-scheduled-health-monitoring.md): scheduled execution, sandbox troubleshooting, failure semantics, rollback, and persistence record
+- [`docs/pdca/PDCA-08-controlled-incident-response.md`](docs/pdca/PDCA-08-controlled-incident-response.md): controlled route failure, evidence-led diagnosis, staged recovery, and persistence record
+- [`docs/pdca/PDCA-09-scheduled-health-monitoring.md`](docs/pdca/PDCA-09-scheduled-health-monitoring.md): scheduled execution, sandbox troubleshooting, failure semantics, rollback, and persistence record
 - [`docs/runbooks/verify-host-only-connectivity.md`](docs/runbooks/verify-host-only-connectivity.md): standardized connectivity verification
 - [`docs/runbooks/configure-static-host-only-address.md`](docs/runbooks/configure-static-host-only-address.md): repeatable static-address configuration and recovery procedure
 - [`docs/runbooks/configure-ssh-key-authentication.md`](docs/runbooks/configure-ssh-key-authentication.md): safe key setup, hardening, verification, and recovery procedure
@@ -83,7 +87,8 @@ flowchart LR
 - [`docs/runbooks/backup-and-restore-configuration.md`](docs/runbooks/backup-and-restore-configuration.md): repeatable backup, integrity verification, isolated restore, and controlled live recovery procedure
 - [`docs/runbooks/run-server-health-check.md`](docs/runbooks/run-server-health-check.md): health-check execution, interpretation, escalation, and recovery procedure
 - [`docs/runbooks/collect-incident-evidence.md`](docs/runbooks/collect-incident-evidence.md): protected evidence collection, validation, interpretation, export, and cleanup procedure
-- [`docs/runbooks/respond-to-missing-default-route.md`](docs/runbooks/respond-to-missing-default-route.md): evidence-first diagnosis, staged recovery, and verification for a missing IPv4 default route\n- [`docs/runbooks/manage-scheduled-health-monitoring.md`](docs/runbooks/manage-scheduled-health-monitoring.md): timer operation, journal review, failure response, testing, and recovery
+- [`docs/runbooks/respond-to-missing-default-route.md`](docs/runbooks/respond-to-missing-default-route.md): evidence-first diagnosis, staged recovery, and verification for a missing IPv4 default route
+- [`docs/runbooks/manage-scheduled-health-monitoring.md`](docs/runbooks/manage-scheduled-health-monitoring.md): timer operation, journal review, failure response, testing, and recovery
 - [`docs/change-log.md`](docs/change-log.md): chronological record of controlled changes
 - [`docs/security-considerations.md`](docs/security-considerations.md): isolation, evidence-sanitization, and remaining risks
 

@@ -117,7 +117,7 @@ Remove only the temporary Ubuntu export after the destination verification passe
 
 - If collection fails, preserve the terminal error and determine which prerequisite or evidence source failed.
 - If a temporary staging directory remains unexpectedly, verify its exact `/tmp/leanops-incident-*` path before removing it.
-- If the collector is damaged, restore it from the verified nine-file configuration backup into an isolated directory first.
+- If the collector is damaged, restore it from the verified eleven-file configuration backup into an isolated directory first.
 - Validate ownership, mode, Bash syntax, and contents before replacing the live script.
 - Restore snapshot `15-PDCA07-IncidentEvidenceVerified` for the completed Cycle 07 state.
 - Restore snapshot `14-PDCA07-PreIncidentEvidence` to remove the complete Cycle 07 implementation.
