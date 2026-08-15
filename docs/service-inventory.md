@@ -106,7 +106,6 @@ The health check does not add a listening network service. It can run on demand 
 | Package updates | WARN when the current APT cache lists updates |
 | Latest backup | SHA-256 verification required, otherwise FAIL |
 
-
 Exit code `0` means all checks passed, `1` means at least one warning and no failures, and `2` means at least one failure.
 
 ## Scheduled health-monitoring standard
