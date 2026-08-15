@@ -26,6 +26,10 @@
 | 2026-08-14 | Recovered the NAT route with `networkctl reconfigure enp0s3` | Restore DHCP-managed routing after lease renewal did not correct the failure | Default route, internet reachability, normal health state, and a fresh key-only SSH session passed | Reboot, inspect networkd state, or restore `16-PDCA08-PreIncidentDrill` |
 | 2026-08-14 | Verified and exported four Cycle 08 evidence states | Preserve the full baseline, failure, recovery, and post-reboot response record outside the VM | All four archives passed Ubuntu and Windows SHA-256 verification; post-reboot health returned 12 PASS, 1 WARN, 0 FAIL | Retain protected originals and verified Windows copies; remove only temporary export data |
 
+| 2026-08-15 | Added a hardened systemd oneshot service and persistent 15-minute timer | Run the existing health check automatically and retain journal records | Warning exit code 1 recorded as success; required-state exit code 2 remained failed; automatic timer activation passed | Disable and remove both units, or restore `18-PDCA09-PreScheduledMonitoring` |
+| 2026-08-15 | Diagnosed and corrected UFW access inside the service sandbox | `ProtectSystem=strict` blocked UFW's runtime lock under `/run` | Transient diagnostics isolated the cause; `ProtectSystem=full` restored UFW checks while retaining read-only protection for `/usr`, `/boot`, and `/etc` | Restore the original unit from snapshot 18 if further testing is required |
+| 2026-08-15 | Ran controlled Apache detection, expanded recovery coverage, and verified post-reboot scheduling | Prove failure handling, rollback, eleven-source recovery, off-VM integrity, and timer persistence | Apache failure produced exit code 2 and evidence; rollback passed; eleven-file restore matched; Windows checksums passed; automatic post-boot run returned 12 PASS, 1 WARN, 0 FAIL | Stop Apache, reset the failed unit, re-enable the timer, or restore snapshot 18 |
+
 ## Snapshot checkpoints
 
 | Snapshot | Verified condition |
@@ -47,4 +51,4 @@
 | `14-PDCA07-PreIncidentEvidence` | Logging services, persistent journal, restricted authentication and UFW logs, and completed Cycle 06 state verified before the collector |
 | `15-PDCA07-IncidentEvidenceVerified` | Healthy and controlled incident packages, sanitization, failure evidence, rollback, nine-file recovery, off-VM verification, and reboot persistence verified |
 | `16-PDCA08-PreIncidentDrill` | Healthy baseline, NAT and host-only addressing, default route, health check, evidence collector, and completed Cycle 07 state verified before the route-failure drill |
-| `17-PDCA08-IncidentResponseVerified` | Controlled route failure detected and preserved; staged recovery, fresh SSH, four evidence states, off-VM verification, and reboot persistence passed |
+| `17-PDCA08-IncidentResponseVerified` | Controlled route failure detected and preserved; staged recovery, fresh SSH, four evidence states, off-VM verification, and reboot persistence passed |\n| `18-PDCA09-PreScheduledMonitoring` | Verified Cycle 08 state before adding systemd service and timer units |\n| `19-PDCA09-ScheduledMonitoringComplete` | Scheduled health service and persistent timer, controlled failure handling, eleven-source recovery, off-VM evidence, automatic post-reboot execution, and final clean state verified |
