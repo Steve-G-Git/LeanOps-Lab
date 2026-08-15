@@ -104,6 +104,7 @@ The fictional lab addresses `10.0.2.0/24` and `192.168.244.0/24` may be document
 - The internet check depends on ICMP replies from `1.1.1.1`; an upstream ICMP policy could produce a failure even when other outbound traffic works.
 - Incident archives can still contain operational details such as service names, package names, fictional lab addresses, timestamps, and authentication outcomes. They remain protected and are not published raw.
 - Sanitization covers the observed MAC, UFW address-field, and generated local IPv6 risks. It is not a universal data-loss-prevention system.
-- The collector packages local evidence on demand. It does not provide centralized logging or tamper-resistant remote storage.\n- Scheduled monitoring records local status but does not currently send remote alerts or automatically collect evidence.
+- The collector packages local evidence on demand. It does not provide centralized logging or tamper-resistant remote storage.
+- Scheduled monitoring records local status but does not currently send remote alerts or automatically collect evidence.
 - Successful DNS resolution during a short route failure may reflect cached resolver state and does not prove full outbound connectivity.
 - Reconfiguring a network interface can briefly interrupt traffic on that interface and requires an independent administrative path or console fallback.
