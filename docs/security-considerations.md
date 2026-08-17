@@ -10,11 +10,11 @@
 ## Current access controls
 
 - SSH is required for remote administration and listens on TCP port 22.
-- SSH public-key authentication is enabled for `leanopsadmin`.
+- SSH public-key authentication is enabled for the designated administrative account.
 - SSH password and keyboard-interactive authentication are disabled.
 - The private key remains on the Windows administrative workstation and is protected by a passphrase.
 - UFW is active with incoming traffic denied and outgoing traffic allowed by default.
-- TCP port 22 is allowed only from the Windows host-only address `192.168.244.1`.
+- TCP port 22 is allowed only from the approved Windows host-only administration address.
 - Routed traffic is disabled in the current UFW policy.
 - Apache remains installed but stopped and disabled.
 - Ubuntu package updates were applied before the first service cycle.
@@ -43,13 +43,25 @@
 
 - `leanops-health-monitor.service` is a root-owned oneshot unit; `leanops-health-monitor.timer` is enabled and persistent.
 - The timer runs approximately every 15 minutes and schedules its first post-boot run after five minutes.
-- `SuccessExitStatus=1` treats warning-only results as successful without accepting failure exit code `2`.
+- The service now launches `/usr/local/sbin/leanops-health-event-handler`, which runs the existing health check under an exclusive lock and passes its output to the Python processor.
+- `SuccessExitStatus=1 2` accepts health warnings and processed health failures because both are recorded and escalated by the processor. Exit code `3` remains a failed monitoring service.
 - Output and errors are recorded in the system journal.
 - `NoNewPrivileges=true`, `PrivateTmp=true`, and `ProtectHome=true` reduce service exposure.
 - `ProtectSystem=full` keeps `/usr`, `/boot`, and `/etc` read-only while allowing UFW's required runtime lock under `/run`.
 - Controlled failure testing pauses the timer and uses an EXIT trap to stop Apache and restart scheduling.
 - Both unit files are protected by the eleven-source configuration backup.
 - Reboot verification confirms timer enablement, activation, and automatic execution.
+
+## Health-event processing controls
+
+- The handler and processor are owned by `root:root` with mode `700`.
+- The handler waits up to 30 seconds for an exclusive lock and returns code `3` if the monitoring pipeline cannot proceed safely.
+- Stable condition identifiers keep changing measurements, such as package counts or percentages, in one condition history.
+- Unknown abnormal messages and mismatches between parsed results and health exit codes return code `3` instead of being silently discarded.
+- `/var/lib/leanops-health-monitor` and `/var/log/leanops-health-events` are `700 root:root`; their state and event files are `600 root:root`.
+- Every abnormal cycle is recorded. Generic healthy runs are not added to the event log, but recovery from a previously active condition is recorded.
+- Warning evidence becomes due on the fourth consecutive occurrence. Failure evidence becomes due on the first occurrence. Recovery clears the active count and evidence latch.
+- The four-occurrence count and recovery reset were verified. Final collector invocation and duplicate suppression after the integrated trigger remain to be observed.
 
 ## Incident-evidence controls
 
@@ -61,6 +73,7 @@
 - MAC addresses and UFW `SRC` and `DST` values are replaced before packaging.
 - IPv4-only interface and route commands avoid collecting generated interface IPv6 addresses.
 - Every evidence archive receives a manifest and SHA-256 checksum, and all artifacts have mode `600`.
+- Raw incident evidence is subject to a 180-day `systemd-tmpfiles` policy.
 - The collector records command exit codes, allowing unavailable or failed evidence sources to remain visible.
 - The collector script is included in the eleven-file configuration backup.
 
@@ -86,14 +99,14 @@ Before publication, screenshots and copied output must be checked for:
 - Machine IDs, boot IDs, and unnecessary MAC addresses
 - Browser tabs or notifications containing unrelated personal information
 
-The fictional lab addresses `10.0.2.0/24` and `192.168.244.0/24` may be documented because they identify only the isolated virtual environment.
+Public documentation uses role-based placeholders for host and subnet addresses unless a specific lab value is essential to understanding the test.
 
 ## Known constraints and remaining risks
 
 - Proton VPN blocked the host-only connection during testing. Current standard work requires disconnecting it during lab access.
-- The host-only VM uses static address `192.168.244.10/24`, outside the VirtualBox DHCP pool. Configuration changes must preserve the lack of a default gateway on this interface.
+- The host-only VM uses a static address outside the VirtualBox DHCP pool. Configuration changes must preserve the lack of a default gateway on this interface.
 - Loss of the Windows private key would require recovery through the VirtualBox console or a verified snapshot. A separate key-backup process has not yet been established.
-- The SSH firewall rule depends on the Windows host-only address remaining `192.168.244.1`.
+- The SSH firewall rule depends on the approved Windows host-only administration address remaining stable.
 - The NAT adapter should be disconnected before any future exercise that intentionally creates a higher-risk service condition.
 - Installed but disabled Apache packages still require updates while retained for rollback.
 - The package protects selected configuration files only. It is not a full-system backup and does not preserve installed packages, user data, SSH host keys, or the VM itself.
@@ -105,6 +118,9 @@ The fictional lab addresses `10.0.2.0/24` and `192.168.244.0/24` may be document
 - Incident archives can still contain operational details such as service names, package names, fictional lab addresses, timestamps, and authentication outcomes. They remain protected and are not published raw.
 - Sanitization covers the observed MAC, UFW address-field, and generated local IPv6 risks. It is not a universal data-loss-prevention system.
 - The collector packages local evidence on demand. It does not provide centralized logging or tamper-resistant remote storage.
-- Scheduled monitoring records local status but does not currently send remote alerts or automatically collect evidence.
+- Health-event records rotate daily, retain up to 180 rotations, expire after 180 days, and compress older rotations.
+- Scheduled monitoring remains local and does not send remote notifications.
+- The new handler, processor, and retention policies have not yet been added to a newly verified configuration-backup package.
+- Automatic collector invocation after the final handler integration has not yet been exercised at a real warning or failure threshold.
 - Successful DNS resolution during a short route failure may reflect cached resolver state and does not prove full outbound connectivity.
 - Reconfiguring a network interface can briefly interrupt traffic on that interface and requires an independent administrative path or console fallback.

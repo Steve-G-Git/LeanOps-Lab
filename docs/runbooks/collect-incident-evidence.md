@@ -113,6 +113,16 @@ Create a temporary mode-`700` export directory in the administrator's Ubuntu hom
 
 Remove only the temporary Ubuntu export after the destination verification passes.
 
+## 8. Retention
+
+Raw incident evidence is retained for 180 days under `/etc/tmpfiles.d/leanops-incident-retention.conf`:
+
+~~~text
+e /var/log/leanops-incidents 0700 root root 180d -
+~~~
+
+Confirmed causes, corrections, runbooks, and sanitized PDCA records are retained separately and are not removed by this rule. Preserve any evidence subject to an active investigation before its retention period expires.
+
 ## Recovery
 
 - If collection fails, preserve the terminal error and determine which prerequisite or evidence source failed.
@@ -121,3 +131,4 @@ Remove only the temporary Ubuntu export after the destination verification passe
 - Validate ownership, mode, Bash syntax, and contents before replacing the live script.
 - Restore snapshot `15-PDCA07-IncidentEvidenceVerified` for the completed Cycle 07 state.
 - Restore snapshot `14-PDCA07-PreIncidentEvidence` to remove the complete Cycle 07 implementation.
+- If the retention rule is damaged, restore or recreate only `/etc/tmpfiles.d/leanops-incident-retention.conf`, validate its ownership and mode, and run `systemd-tmpfiles --clean` with the exact incident-directory prefix.
