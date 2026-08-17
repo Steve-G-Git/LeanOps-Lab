@@ -1,14 +1,79 @@
-# LeanOps Lab: Improving a Small-Business Network with PDCA
+# LeanOps-Lab
 
-LeanOps Lab is a hands-on learning project that applies PDCA and practical Lean methods to a small virtual network. The lab simulates a poorly documented small-business environment, establishes its current condition, makes one controlled improvement at a time, and verifies each result.
+LeanOps-Lab is a hands-on virtual network project that applies PDCA and practical Lean methods to Linux administration, networking, security, monitoring, incident response, and technical documentation.
 
-This is a self-directed lab project. It does not represent professional employment in networking, cybersecurity, or system administration.
+The lab begins with a small, poorly documented environment. Each cycle identifies one problem, makes a controlled change, verifies the result, preserves rollback, and updates the standard. This is a self-directed learning project and is not presented as professional IT employment.
 
 ## Current status
 
-**Status: Active development, 10 PDCA cycles completed**
+**Active development: 11 PDCA cycles completed**
 
-Cycle 10 added a locked Bash handler and Python state processor to classify abnormal conditions, count repeated warnings, record recoveries, and trigger automatic evidence collection. Warning evidence is collected on the fourth consecutive occurrence; failures are collected immediately. Event-log and raw-evidence retention are bounded at 180 days. Integrated collection, duplicate suppression, recovery, permissions, timer operation, 15-source backup and isolated restoration, and retention all passed.
+The current system uses a hardened 15-minute systemd timer, a root-controlled health check, durable condition state, warning and failure thresholds, automatic evidence collection, recovery records, a protected 15-source configuration backup, and 180-day operational-record retention. Cycle 11 reorganized the project so the architecture, control logic, verification history, and standard work can be understood quickly without changing the verified server state.
+
+## Start here
+
+| If you want to understand... | Start with |
+|---|---|
+| What the system is and how its parts connect | [Architecture and control flow](docs/architecture.md) |
+| What changed in each improvement cycle | [Verified outcomes](#verified-outcomes) |
+| How PDCA was applied | [PDCA records](docs/pdca/) |
+| How routine work and recovery are performed | [Operational runbooks](docs/runbooks/) |
+| What was changed and which snapshots preserve recovery points | [Change and snapshot log](docs/change-log.md) |
+| How public evidence is protected | [Security considerations](docs/security-considerations.md) |
+
+## Why LeanOps?
+
+LeanOps-Lab applies manufacturing improvement principles to IT operations:
+
+| Lean principle | Application in the lab |
+|---|---|
+| Make abnormal conditions visible | Health results distinguish pass, warning, failure, and monitoring-pipeline errors |
+| Build quality into the process | Scripts reject unknown conditions, invalid results, unsafe paths, and mismatched state |
+| Standardize successful work | Verified procedures become runbooks and current-state documentation |
+| Use evidence instead of assumptions | Each change includes before-and-after checks and sanitized proof |
+| Reduce repeated effort and noise | Scheduling, stable condition identities, thresholds, and duplicate suppression automate routine work without hiding problems |
+| Preserve recovery | Backups, isolated restores, rollback steps, and snapshots are verified before a change becomes standard |
+
+## Architecture at a glance
+
+### Lab topology
+
+```mermaid
+flowchart LR
+    Internet["Internet"] --> NAT["VirtualBox NAT<br/>outbound access"]
+    NAT --> Server["Ubuntu Server<br/>monitored system"]
+    Workstation["Windows host<br/>administration and testing"] <--> Isolated["Host-only network<br/>isolated lab traffic"]
+    Isolated <--> Server
+```
+
+- NAT provides controlled outbound updates without public exposure or port forwarding.
+- The host-only network carries administration, validation, and approved scanning.
+- The Windows host provides an independent test point and off-VM backup copy.
+
+### Health-monitor workflow
+
+```mermaid
+flowchart TD
+    Timer["15-minute systemd timer"] --> Handler["Locked Bash handler"]
+    Handler --> Check["Server health check"]
+    Check --> Processor["Python event processor"]
+    Processor --> State["Protected condition state and event history"]
+    Processor --> Decision{"Evidence due?"}
+    Decision -->|"Warning: occurrence 4"| Collector["Sanitized evidence collector"]
+    Decision -->|"Failure: occurrence 1"| Collector
+    Decision -->|"No"| Journal["Journal and tally only"]
+    Collector --> Evidence["Integrity-checked incident package"]
+```
+
+| Result | Exit code | Recorded behavior |
+|---|---:|---|
+| Healthy | 0 | Remains in the system journal; generic healthy runs are not duplicated in the event log |
+| Warning | 1 | Every occurrence is tallied; evidence is collected on the fourth consecutive occurrence |
+| Failure | 2 | Recorded and evidence is collected immediately |
+| Monitoring-pipeline error | 3 | Service failure remains visible and requires investigation |
+| Recovery | Health result returns to normal | One recovery event is recorded; count and evidence latch reset |
+
+See [Architecture and control flow](docs/architecture.md) for component responsibilities, data protection, retention, and recovery boundaries.
 
 ## Verified outcomes
 
@@ -19,101 +84,44 @@ Cycle 10 added a locked Bash handler and Python state processor to classify abno
 | 03 | SSH allowed password authentication | Established key authentication and disabled SSH passwords | Key access persisted; password-only access was rejected; port baseline retained |
 | 04 | No active host firewall | Enabled UFW with default-deny inbound policy and source-restricted SSH | Approved SSH persisted; 999 other common TCP ports changed from closed to filtered |
 | 05 | Recovery depended on VM snapshots | Created a protected, portable configuration backup process | Seven approved files restored byte-for-byte with matching metadata; Ubuntu and Windows checksum tests passed |
-| 06 | Server health required separate manual checks | Created a root-controlled health-check script | Normal state returned 12 PASS, 1 WARN, 0 FAIL; controlled Apache failure returned exit code 2 and rolled back safely |
-| 07 | Incident evidence required manual collection | Created a sanitized, integrity-checked evidence collector | Healthy and controlled-failure packages verified; Apache failure preserved before automatic rollback; off-VM checks passed |
-| 08 | Detection and evidence controls had not been tested through a complete network incident | Ran a controlled missing-default-route response drill | Failure detected and preserved; route-level cause isolated; staged recovery, fresh SSH, reboot persistence, and four Windows checksums passed |
-| 09 | Health checks depended on manual execution | Added a hardened oneshot service and persistent 15-minute systemd timer | Warning and failure semantics, journal records, controlled detection, rollback, backup recovery, automatic execution, and reboot persistence passed |
-| 10 | Repeated abnormal results had no durable condition state or bounded retention | Added health-event processing, condition counts, recovery records, evidence thresholds, and 180-day retention | Integrated collection, duplicate suppression, recovery reset, protected records, timer operation, 15-source backup restoration, and retention passed |
+| 06 | Server health required separate manual checks | Created a root-controlled health-check script | Normal, warning, controlled-failure, and rollback behavior passed |
+| 07 | Incident evidence required manual collection | Created a sanitized, integrity-checked evidence collector | Healthy and failure packages verified; failure state was preserved before rollback |
+| 08 | Controls had not been tested through a complete network incident | Ran a controlled missing-default-route response drill | Failure was preserved, cause isolated, recovery staged, and reboot persistence verified |
+| 09 | Health checks depended on manual execution | Added a hardened oneshot service and persistent 15-minute timer | Automated execution, journal records, rollback, recovery, and reboot persistence passed |
+| 10 | Repeated abnormal results lacked durable state and bounded retention | Added condition counts, recovery records, evidence thresholds, and 180-day retention | Threshold collection, duplicate suppression, protected records, 15-source restoration, and retention passed |
+| 11 | The mature lab was difficult to understand quickly | Added architecture documentation, visual control flow, role-based navigation, and a recruiter-facing project summary | Links, Mermaid syntax, terminology, cycle counts, current-state claims, and identifier sanitization were audited |
+
+## Repository map
+
+| Area | Contents |
+|---|---|
+| [Architecture](docs/architecture.md) | Current topology, health-monitor flow, components, data, retention, and recovery boundaries |
+| [Project scope](docs/scope.md) | Fictional scenario, boundaries, safety rules, and accuracy statement |
+| [Asset inventory](docs/asset-inventory.md) | Hardware, operating system, storage, and network inventory |
+| [Service inventory](docs/service-inventory.md) | Required services and externally observed exposure |
+| [PDCA records](docs/pdca/) | Eleven Plan, Do, Check, Act records with risks, tests, evidence, and adopted standards |
+| [Runbooks](docs/runbooks/) | Repeatable configuration, verification, monitoring, evidence, response, backup, and recovery procedures |
+| [Change and snapshot log](docs/change-log.md) | Chronological changes, verification, rollback, and recovery checkpoints |
+| [Security considerations](docs/security-considerations.md) | Isolation, access control, sanitization, remaining risks, and data protection |
+| [Sanitized evidence](evidence/sanitized/) | Compact public excerpts that exclude credentials and unnecessary identifiers |
 
 ## Skills demonstrated
 
-- Linux administration
-- TCP/IP and service validation
-- Nmap and PowerShell testing
-- SSH administration
-- SSH key-based authentication
-- UFW host firewall administration
-- Bash backup scripting
-- SHA-256 integrity verification
-- Isolated configuration restoration
-- Backup scope and permission control
-- Bash health-check scripting
-- Operational thresholds and exit codes
-- Controlled failure testing and automatic rollback
-- Incident evidence collection
-- Incident response and staged network recovery
-- systemd service and timer administration
-- Scheduled monitoring and journal review
-- Python health-event processing
-- Persistent condition state and recovery tracking
-- Warning thresholds and evidence latching
-- Log rotation and bounded evidence retention
-- Route and interface diagnosis
-- Journal and authentication-log review
-- Evidence sanitization and integrity verification
-- VirtualBox networking
-- Controlled change management
-- Troubleshooting documentation
-- PDCA and standardized work
-
-## Lab topology
-
-```mermaid
-flowchart LR
-    Internet["Internet"] --> NAT["VirtualBox NAT<br/>private lab subnet"]
-    NAT --> Server["Ubuntu Server<br/>leanops-server"]
-    Windows["Windows host<br/>Test workstation"] <--> HostOnly["VirtualBox host-only network<br/>isolated lab subnet"]
-    HostOnly <--> Server
-```
-
-- Adapter 1 uses VirtualBox NAT for controlled outbound updates.
-- Adapter 2 uses a host-only network for isolated administration and scanning.
-- No router port forwarding or public exposure is configured.
-- Proton VPN must be disconnected during current lab tests because it blocks the host-only connection in the observed configuration.
-
-## Repository contents
-
-- [`docs/scope.md`](docs/scope.md): fictional business scenario, boundaries, and safety rules
-- [`docs/asset-inventory.md`](docs/asset-inventory.md): current hardware, operating-system, storage, and network inventory
-- [`docs/service-inventory.md`](docs/service-inventory.md): internal and externally observed services
-- [`docs/pdca/PDCA-01-apache-service-reduction.md`](docs/pdca/PDCA-01-apache-service-reduction.md): complete Plan, Do, Check, Act record
-- [`docs/pdca/PDCA-02-static-host-only-address.md`](docs/pdca/PDCA-02-static-host-only-address.md): static-address improvement and verification record
-- [`docs/pdca/PDCA-03-ssh-key-authentication.md`](docs/pdca/PDCA-03-ssh-key-authentication.md): key-authentication and SSH-hardening record
-- [`docs/pdca/PDCA-04-ufw-host-firewall.md`](docs/pdca/PDCA-04-ufw-host-firewall.md): host-firewall configuration and verification record
-- [`docs/pdca/PDCA-05-configuration-backup.md`](docs/pdca/PDCA-05-configuration-backup.md): protected configuration-backup and isolated-restore record
-- [`docs/pdca/PDCA-06-server-health-check.md`](docs/pdca/PDCA-06-server-health-check.md): repeatable health check, warning state, controlled failure, and rollback record
-- [`docs/pdca/PDCA-07-incident-evidence-collection.md`](docs/pdca/PDCA-07-incident-evidence-collection.md): healthy baseline, controlled incident, evidence sanitization, and verification record
-- [`docs/pdca/PDCA-08-controlled-incident-response.md`](docs/pdca/PDCA-08-controlled-incident-response.md): controlled route failure, evidence-led diagnosis, staged recovery, and persistence record
-- [`docs/pdca/PDCA-09-scheduled-health-monitoring.md`](docs/pdca/PDCA-09-scheduled-health-monitoring.md): scheduled execution, sandbox troubleshooting, failure semantics, rollback, and persistence record
-- [`docs/pdca/PDCA-10-health-event-processing.md`](docs/pdca/PDCA-10-health-event-processing.md): abnormal-condition state, evidence thresholds, recovery tracking, retention, and verified closure
-- [`docs/runbooks/verify-host-only-connectivity.md`](docs/runbooks/verify-host-only-connectivity.md): standardized connectivity verification
-- [`docs/runbooks/configure-static-host-only-address.md`](docs/runbooks/configure-static-host-only-address.md): repeatable static-address configuration and recovery procedure
-- [`docs/runbooks/configure-ssh-key-authentication.md`](docs/runbooks/configure-ssh-key-authentication.md): safe key setup, hardening, verification, and recovery procedure
-- [`docs/runbooks/configure-ufw-host-firewall.md`](docs/runbooks/configure-ufw-host-firewall.md): source-restricted firewall setup, testing, and recovery procedure
-- [`docs/runbooks/backup-and-restore-configuration.md`](docs/runbooks/backup-and-restore-configuration.md): repeatable backup, integrity verification, isolated restore, and controlled live recovery procedure
-- [`docs/runbooks/run-server-health-check.md`](docs/runbooks/run-server-health-check.md): health-check execution, interpretation, escalation, and recovery procedure
-- [`docs/runbooks/collect-incident-evidence.md`](docs/runbooks/collect-incident-evidence.md): protected evidence collection, validation, interpretation, export, and cleanup procedure
-- [`docs/runbooks/respond-to-missing-default-route.md`](docs/runbooks/respond-to-missing-default-route.md): evidence-first diagnosis, staged recovery, and verification for a missing IPv4 default route
-- [`docs/runbooks/manage-scheduled-health-monitoring.md`](docs/runbooks/manage-scheduled-health-monitoring.md): timer operation, journal review, failure response, testing, and recovery
-- [`docs/runbooks/manage-health-event-processing.md`](docs/runbooks/manage-health-event-processing.md): state inspection, event review, evidence-latch verification, retention, and rollback
-- [`docs/change-log.md`](docs/change-log.md): chronological record of controlled changes
-- [`docs/security-considerations.md`](docs/security-considerations.md): isolation, evidence-sanitization, and remaining risks
-
-## Tools used
-
-- Windows host computer
-- Oracle VirtualBox 7.2.2
-- Ubuntu Server 26.04 LTS
-- OpenSSH
-- Apache HTTP Server
-- Nmap 7.99 and Npcap 1.87
-- PowerShell
-- Linux command-line tools including `systemctl`, `ss`, `ip`, `tar`, `sha256sum`, `stat`, `cmp`, `mktemp`, `lsblk`, and `free`
+- **Networking:** IPv4 addressing, routing, DNS, NAT, host-only networking, Nmap, and independent endpoint validation
+- **Linux administration:** OpenSSH, systemd, UFW, journal review, file permissions, services, and timers
+- **Automation:** Bash validation and orchestration, Python state processing, exit-code contracts, locking, and atomic writes
+- **Security and recovery:** Key-only SSH, source-restricted firewall rules, evidence sanitization, SHA-256 integrity, protected backups, and isolated restoration
+- **Operations:** Health checks, abnormal-condition tracking, thresholds, incident evidence, retention, controlled failure testing, and staged recovery
+- **Continuous improvement:** PDCA, standardized work, rollback planning, before-and-after verification, and concise technical documentation
 
 ## Evidence policy
 
-Public evidence will be sanitized before it is added. Passwords, authentication material, real home-network information, personal usernames, unique system identifiers, and unnecessary MAC addresses will not be published.
+Public evidence is sanitized before publication. Passwords, private keys, tokens, authentication material, personal usernames, real home-network details, fingerprints, machine identifiers, and unnecessary MAC or IP addresses are excluded. Raw operational records remain protected inside the lab and expire under the documented 180-day policy.
+
+## Tools used
+
+Windows 11, Oracle VirtualBox, Ubuntu Server, OpenSSH, Apache, UFW, Nmap, PowerShell, Bash, Python, systemd, Git, and GitHub.
 
 ## Next improvement
 
-Cycle 11 can build on the completed local monitoring pipeline by adding a controlled notification path. The next cycle should define who is notified, which conditions warrant notification, how repeated alerts are suppressed, how delivery failure remains visible, and how the notification path is tested and rolled back. Snapshot `21-PDCA10-HealthEventProcessingComplete` preserves the completed Cycle 10 state.
+Cycle 12 can add a controlled notification path to the completed local monitoring pipeline. It should define which conditions warrant notification, who receives them, how repeated notifications are suppressed, how delivery failure remains visible, and how the entire path is tested and rolled back. Snapshot `21-PDCA10-HealthEventProcessingComplete` remains the current server recovery point because Cycle 11 changed documentation only.
