@@ -36,3 +36,4 @@ tmpfiles cleanup: passed without errors
 OPEN VALIDATION
 integrated evidence collection at threshold: not yet observed
 duplicate suppression after automatic collection: not yet observed
+expanded configuration-backup coverage: not yet completed and verified

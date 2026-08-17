@@ -6,9 +6,9 @@ This is a self-directed lab project. It does not represent professional employme
 
 ## Current status
 
-**Status: Active development, 9 PDCA cycles completed; Cycle 10 implementation verified with one remaining end-to-end trigger test**
+**Status: Active development, 9 PDCA cycles completed; Cycle 10 implemented with final closure checks remaining**
 
-Cycle 10 added a locked Bash handler and Python state processor to classify abnormal conditions, count repeated warnings, record recoveries, and prepare automatic evidence collection. Warning evidence is due on the fourth consecutive occurrence; failures are due immediately. Event-log and raw-evidence retention are bounded at 180 days. Counting, recovery, permissions, timer operation, and retention passed; the collector invocation after the final integration remains to be observed at a real threshold.
+Cycle 10 added a locked Bash handler and Python state processor to classify abnormal conditions, count repeated warnings, record recoveries, and prepare automatic evidence collection. Warning evidence is due on the fourth consecutive occurrence; failures are due immediately. Event-log and raw-evidence retention are bounded at 180 days. Counting, recovery, permissions, timer operation, and retention passed. Cycle closure still requires the integrated collector-trigger test, duplicate-suppression verification, and expanded configuration-backup coverage.
 
 ## Verified outcomes
 
@@ -23,7 +23,7 @@ Cycle 10 added a locked Bash handler and Python state processor to classify abno
 | 07 | Incident evidence required manual collection | Created a sanitized, integrity-checked evidence collector | Healthy and controlled-failure packages verified; Apache failure preserved before automatic rollback; off-VM checks passed |
 | 08 | Detection and evidence controls had not been tested through a complete network incident | Ran a controlled missing-default-route response drill | Failure detected and preserved; route-level cause isolated; staged recovery, fresh SSH, reboot persistence, and four Windows checksums passed |
 | 09 | Health checks depended on manual execution | Added a hardened oneshot service and persistent 15-minute systemd timer | Warning and failure semantics, journal records, controlled detection, rollback, backup recovery, automatic execution, and reboot persistence passed |
-| 10 | Repeated abnormal results had no durable condition state or bounded retention | Added health-event processing, condition counts, recovery records, evidence thresholds, and 180-day retention | Parsing, four-occurrence warning threshold, recovery reset, protected state and event records, timer operation, and retention passed; final collector-trigger validation remains open |
+| 10 | Repeated abnormal results had no durable condition state or bounded retention | Added health-event processing, condition counts, recovery records, evidence thresholds, and 180-day retention | Parsing, four-occurrence warning threshold, recovery reset, protected state and event records, timer operation, and retention passed; collector, duplicate-control, and backup closure checks remain open |
 
 ## Skills demonstrated
 

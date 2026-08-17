@@ -6,7 +6,7 @@ Cycle 10 extended the scheduled health monitor with durable abnormal-condition s
 
 Warning evidence is due on the fourth consecutive occurrence of the same condition. Failures are due immediately. Recovery resets the consecutive count and evidence latch. Ordinary healthy runs remain in the system journal but are not duplicated in the health-event log.
 
-The counting, recovery, file protection, timer integration, and 180-day retention policies passed. The final automatic collector invocation after the integrated threshold remains an open validation item, so this cycle is documented as implemented but not yet fully closed.
+The counting, recovery, file protection, timer integration, and 180-day retention policies passed. Automatic collector invocation, duplicate suppression after collection, and expanded configuration-backup coverage remain open, so this cycle is documented as implemented but not yet fully closed.
 
 ## Plan
 
@@ -150,8 +150,9 @@ configuration validation: passed
 | Raw-evidence retention policy | Passed |
 | Integrated collector invocation at threshold | Not yet observed |
 | Duplicate suppression after automatic collection | Not yet observed |
+| Expanded configuration-backup coverage | Not yet completed and verified |
 
-The implementation met the state, recording, recovery, service, and retention objectives. The cycle remains open until the final two evidence-trigger checks pass.
+The implementation met the state, recording, recovery, service, and retention objectives. The cycle remains open until the evidence-trigger checks and expanded backup verification pass.
 
 ## Act
 

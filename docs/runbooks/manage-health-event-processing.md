@@ -90,7 +90,13 @@ Prefer natural scheduled occurrences. If a controlled failure is required, use t
 
 Confirm one evidence package at the applicable threshold, set `evidence_collected` to `true`, then run one additional occurrence and confirm no duplicate package. Restore the healthy condition and verify a `RECOVERED` event and empty active state.
 
-## 8. Troubleshoot pipeline code 3
+## 8. Expand configuration-backup coverage
+
+Before closing Cycle 10, add the handler, processor, modified service unit, logrotate policy, and tmpfiles policy to the root-controlled configuration-backup allowlist. Create a fresh backup and verify its checksum, exact source scope, ownership, permissions, and isolated restoration before treating the new components as recoverable.
+
+Do not mark this step complete from allowlist membership alone. The resulting archive and restore test must both pass.
+
+## 9. Troubleshoot pipeline code 3
 
 ~~~bash
 systemctl status leanops-health-monitor.service --no-pager

@@ -2,10 +2,14 @@
 
 Only reviewed and sanitized evidence belongs in this directory.
 
-## Suggested structure
+## Structure
 
 - `sanitized/`: screenshots or text output approved for public use
 - `raw/`: local working evidence excluded by `.gitignore`
+
+## Published evidence
+
+- [`sanitized/pdca-10-health-event-retention.txt`](sanitized/pdca-10-health-event-retention.txt): processor, condition-state, service, retention, and open-validation results for Cycle 10
 
 ## Review checklist
 
@@ -18,10 +22,4 @@ Before adding evidence, remove or crop:
 - SSH fingerprints unless they are essential to the documented test
 - Unrelated browser tabs, notifications, and personal content
 
-Give sanitized files descriptive names such as:
-
-```text
-pdca-01-before-nmap-ssh-only.png
-pdca-01-temporary-apache-http-open.png
-pdca-01-after-nmap-http-closed.png
-```
+Use descriptive filenames that identify the PDCA cycle, test, and observed state without exposing unnecessary identifiers.
