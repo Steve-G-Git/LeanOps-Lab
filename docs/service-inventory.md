@@ -11,7 +11,7 @@ sudo ss -lntup
 External inspection used from Windows:
 
 ```powershell
-nmap -sT -sV -Pn 192.168.244.10
+nmap -sT -sV -Pn <server-host-only-ip>
 ```
 
 | Port | Protocol | Binding or scope | Process or service | External result | Classification |
@@ -41,7 +41,7 @@ Apache remains installed for simple rollback, but it is stopped and disabled.
 | 22/TCP | Open | Open after change and reboot |
 | 80/TCP | Closed | Closed after change and reboot |
 
-The final Cycle 03 Nmap scan against `192.168.244.10` found TCP port 22 open and 999 commonly scanned TCP ports closed.
+The final Cycle 03 Nmap scan against the server's host-only address found TCP port 22 open and 999 commonly scanned TCP ports closed.
 
 ## SSH authentication standard
 
@@ -64,7 +64,7 @@ Authentication hardening changed how SSH validates users but did not add another
 | Default incoming policy | Deny |
 | Default outgoing policy | Allow |
 | Routed traffic | Disabled |
-| SSH rule | Allow TCP 22 from `192.168.244.1` only |
+| SSH rule | Allow TCP 22 from the approved host-only administration address only |
 | Nmap from approved workstation | TCP 22 open; 999 commonly scanned TCP ports filtered |
 | Outbound routing | Successful |
 | DNS resolution | Successful after reboot |
@@ -98,7 +98,7 @@ The health check does not add a listening network service. It can run on demand 
 | SSH | Active, otherwise FAIL |
 | Apache | Inactive, otherwise FAIL |
 | UFW | Active with documented defaults and restricted TCP 22 rule, otherwise FAIL |
-| Host-only address | `192.168.244.10/24` present on `enp0s8`, otherwise FAIL |
+| Host-only address | Documented static address present on `enp0s8`, otherwise FAIL |
 | Default route | Present through NAT interface `enp0s3`, otherwise FAIL |
 | Internet and DNS | Reachable and resolvable, otherwise FAIL |
 | Root filesystem | WARN at 80%; FAIL at 90% |
@@ -118,12 +118,34 @@ The health check remains available on demand and also runs through a root-owned 
 | Timer | `leanops-health-monitor.timer`, enabled and active |
 | Schedule | Five minutes after boot and approximately every 15 minutes |
 | Warning handling | Exit code `1` accepted as a successful service run |
-| Failure handling | Exit code `2` retains a failed service state |
+| Health failure handling | Exit code `2` is accepted after the processor records and escalates the condition |
+| Pipeline failure handling | Exit code `3` retains a failed service state |
 | Logging | Standard output and errors recorded in the system journal |
 | Hardening | `NoNewPrivileges`, `PrivateTmp`, `ProtectHome`, and `ProtectSystem=full` |
 | Controlled test | Apache failure detected; evidence preserved; EXIT trap restored Apache and timer |
 | Reboot verification | Timer remained enabled and active; automatic health run completed |
-| Recovery coverage | Service and timer included in the eleven-file configuration backup |
+| Recovery coverage | Service and timer included in the verified 15-source configuration backup |
+
+## Health-event processing standard
+
+The event handler and processor add no listening service or network port.
+
+| Control | Verified state |
+|---|---|
+| Handler | `/usr/local/sbin/leanops-health-event-handler`, `700 root:root` |
+| Processor | `/usr/local/sbin/leanops-health-event-processor`, `700 root:root` |
+| Locking | Exclusive lock with a 30-second maximum wait |
+| State | `/var/lib/leanops-health-monitor/condition-state.json`, `600 root:root` |
+| Event history | `/var/log/leanops-health-events/health-events.tsv`, `600 root:root` |
+| Healthy runs | Not added to the health-event log |
+| Recovery | Active condition removed and one recovery record written |
+| Warning threshold | Evidence due on consecutive occurrence 4 |
+| Failure threshold | Evidence due on occurrence 1 |
+| Duplicate control | Evidence latch retained until recovery |
+| Event retention | Daily rotation, up to 180 rotations, maximum age 180 days |
+| Raw evidence retention | Files under `/var/log/leanops-incidents` cleaned after 180 days |
+
+Parsing, counting, integrated collection, duplicate suppression, recovery, permissions, live service execution, 15-source backup restoration, and retention passed.
 
 ## Incident-evidence collection standard
 

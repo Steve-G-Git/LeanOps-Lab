@@ -1,0 +1,47 @@
+PDCA 10 SANITIZED EVIDENCE
+
+PROCESSOR VALIDATION
+syntax exit code: 0
+missing arguments: pipeline code 3
+missing input file: pipeline code 3
+invalid health code: pipeline code 3
+unknown abnormal condition: pipeline code 3
+health-code mismatch: pipeline code 3
+known warning condition ID: package_updates
+
+CONDITION STATE TEST
+warning observations: 1, 2, 3, 4
+evidence due at occurrence: 4
+active conditions after recovery: 0
+recovery event: recorded
+generic healthy event: not recorded
+
+LIVE SERVICE
+service result: success
+failed units: 0
+timer state: active and scheduled
+processor state file: 0600 root:root
+health-event log: 0600 root:root
+
+RETENTION VALIDATION
+event rotation frequency: daily
+rotations retained: 180
+maximum event age: 180 days
+older rotations: compressed
+raw incident evidence age: 180 days
+retention policy files: 0644 root:root
+logrotate debug: passed
+tmpfiles cleanup: passed without errors
+
+CLOSURE VALIDATION
+integrated evidence collection at threshold: passed
+duplicate suppression after automatic collection: passed
+warning count continued after evidence collection: passed
+configuration-backup sources: 15
+archive checksum: passed
+isolated restore sources: 15
+content mismatches: 0
+metadata mismatches: 0
+final service result: success
+timer: enabled and active
+failed units: 0

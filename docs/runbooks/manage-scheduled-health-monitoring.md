@@ -8,6 +8,7 @@ Operate, verify, troubleshoot, and recover the LeanOps systemd health-monitor se
 
 - Key-authenticated SSH or VirtualBox console access
 - `leanops-health-check` installed at `/usr/local/sbin/leanops-health-check`
+- `leanops-health-event-handler` and `leanops-health-event-processor` installed at their documented paths
 - Service and timer owned by `root:root` with mode `644`
 - No planned maintenance changing the expected service state
 
@@ -42,7 +43,8 @@ echo "START_EXIT_CODE=$start_rc"
 |---|---|
 | Exit `0` | Success |
 | Exit `1` | Success because warnings are accepted |
-| Exit `2` | Failed service |
+| Exit `2` | Success because the processor recorded and escalated the health failure |
+| Exit `3` | Failed service because the monitoring pipeline failed |
 
 A successful oneshot returns to `inactive (dead)`. That does not mean monitoring is disabled.
 
@@ -66,7 +68,7 @@ systemctl status leanops-health-monitor.service --no-pager
 sudo journalctl -u leanops-health-monitor.service -n 80 --no-pager
 ~~~
 
-Use the reported `FAIL:` line to select the smallest diagnostic. If additional evidence is required:
+Use the reported `FAIL:` or processor error line to select the smallest diagnostic. Processed health failures should create evidence immediately. If automatic evidence failed or additional evidence is required:
 
 ~~~bash
 sudo /usr/local/sbin/leanops-incident-collect scheduled-monitor-failure
@@ -137,3 +139,5 @@ sudo systemctl enable --now leanops-health-monitor.timer
 If a unit file is damaged, extract the latest verified eleven-source configuration archive into an isolated temporary directory. Compare content, ownership, and permissions before replacing either live file. Reload and validate systemd after replacement.
 
 If file-level recovery fails, restore snapshot `19-PDCA09-ScheduledMonitoringComplete`. To remove the entire Cycle 09 change, restore snapshot `18-PDCA09-PreScheduledMonitoring`.
+
+For condition counts, recovery events, evidence latches, and retention, use [`manage-health-event-processing.md`](manage-health-event-processing.md). Snapshot `Health Monitor Retention Verified - 2026-08-17` preserves the current handler-based implementation.

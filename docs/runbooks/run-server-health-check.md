@@ -21,6 +21,8 @@ echo "EXIT_CODE=$health_rc"
 
 Record the UTC timestamp, summary, individual non-pass results, and exit code.
 
+This direct command tests health-check logic only. Normal scheduled operation runs through `leanops-health-event-handler`, which records abnormal condition state and event history.
+
 ## 2. Interpret the exit code
 
 | Exit code | Meaning | Required response |
@@ -28,6 +30,7 @@ Record the UTC timestamp, summary, individual non-pass results, and exit code.
 | `0` | All checks passed | Record result; no correction required |
 | `1` | One or more warnings, no failures | Review and schedule appropriate follow-up |
 | `2` | One or more failures | Investigate before declaring the server healthy |
+| `3` | Handler or processor pipeline error | Inspect the scheduled service journal and health-event processing components |
 | `126` | Direct execution denied | Run the protected script with `sudo` |
 
 ## 3. Review warnings
@@ -71,6 +74,8 @@ echo "EXIT_CODE=$health_rc"
 
 Confirm the original failure is gone and no new failure appeared.
 
+When verifying the complete scheduled pipeline, also confirm that the active condition was removed and one `RECOVERED` event was written. Generic healthy runs are intentionally not added to the health-event log.
+
 ## Controlled-test safeguard
 
 Do not create a failure on a production system merely to test monitoring. In this isolated lab, the Apache test used an automatic EXIT trap:
@@ -98,7 +103,8 @@ systemctl is-active apache2
 
 ## Recovery
 
-- If the health-check script itself is damaged, restore only that file from a verified eleven-file configuration backup into an isolated directory first.
+- If the health-check script itself is damaged, restore only that file from the verified 15-source configuration backup into an isolated directory first.
 - Validate restored ownership, mode, contents, and Bash syntax before replacing the live script.
 - If file-level recovery fails, restore snapshot `13-PDCA06-HealthCheckVerified`.
 - To remove the complete Cycle 06 implementation, restore snapshot `12-PDCA06-PreHealthCheck`.
+- For handler, processor, condition-state, or event-log problems, follow [`manage-health-event-processing.md`](manage-health-event-processing.md) rather than modifying the health-check script first.
