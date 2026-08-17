@@ -37,7 +37,7 @@
 - Output reports only operational status, percentages, counts, and fictional lab addresses. It does not display configuration contents or checksum values.
 - Required-state failures return exit code `2`; warnings return `1`; an all-pass result returns `0`.
 - A controlled Apache failure was protected by an EXIT trap that restored the required inactive state.
-- The health-check script and both scheduled-monitoring unit files are included in the eleven-file configuration backup.
+- The health-check script and both scheduled-monitoring unit files are included in the verified 15-source configuration backup.
 
 ## Scheduled-monitoring controls
 
@@ -61,7 +61,7 @@
 - `/var/lib/leanops-health-monitor` and `/var/log/leanops-health-events` are `700 root:root`; their state and event files are `600 root:root`.
 - Every abnormal cycle is recorded. Generic healthy runs are not added to the event log, but recovery from a previously active condition is recorded.
 - Warning evidence becomes due on the fourth consecutive occurrence. Failure evidence becomes due on the first occurrence. Recovery clears the active count and evidence latch.
-- The four-occurrence count and recovery reset were verified. Final collector invocation and duplicate suppression after the integrated trigger remain to be observed.
+- The four-occurrence count, integrated collector invocation, duplicate suppression, and recovery reset were verified.
 
 ## Incident-evidence controls
 
@@ -75,7 +75,7 @@
 - Every evidence archive receives a manifest and SHA-256 checksum, and all artifacts have mode `600`.
 - Raw incident evidence is subject to a 180-day `systemd-tmpfiles` policy.
 - The collector records command exit codes, allowing unavailable or failed evidence sources to remain visible.
-- The collector script is included in the eleven-file configuration backup.
+- The collector and Cycle 10 monitoring components are included in the verified 15-source configuration backup.
 
 ## Incident-response controls
 
@@ -120,7 +120,7 @@ Public documentation uses role-based placeholders for host and subnet addresses 
 - The collector packages local evidence on demand. It does not provide centralized logging or tamper-resistant remote storage.
 - Health-event records rotate daily, retain up to 180 rotations, expire after 180 days, and compress older rotations.
 - Scheduled monitoring remains local and does not send remote notifications.
-- The new handler, processor, and retention policies have not yet been added to a newly verified configuration-backup package.
-- Automatic collector invocation after the final handler integration has not yet been exercised at a real warning or failure threshold.
+- The handler, processor, service and timer units, collector, and retention policies are included in a verified 15-source configuration-backup package.
+- Automatic collector invocation and duplicate suppression were verified through a recurring warning; notification remains local only.
 - Successful DNS resolution during a short route failure may reflect cached resolver state and does not prove full outbound connectivity.
 - Reconfiguring a network interface can briefly interrupt traffic on that interface and requires an independent administrative path or console fallback.

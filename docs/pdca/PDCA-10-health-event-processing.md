@@ -6,7 +6,7 @@ Cycle 10 extended the scheduled health monitor with durable abnormal-condition s
 
 Warning evidence is due on the fourth consecutive occurrence of the same condition. Failures are due immediately. Recovery resets the consecutive count and evidence latch. Ordinary healthy runs remain in the system journal but are not duplicated in the health-event log.
 
-The counting, recovery, file protection, timer integration, and 180-day retention policies passed. Automatic collector invocation, duplicate suppression after collection, and expanded configuration-backup coverage remain open, so this cycle is documented as implemented but not yet fully closed.
+The counting, recovery, file protection, timer integration, automatic collector invocation, duplicate suppression, 15-source configuration backup, isolated restoration, and 180-day retention policies passed. Cycle 10 is complete.
 
 ## Plan
 
@@ -148,11 +148,11 @@ configuration validation: passed
 | Service and timer operation | Passed |
 | Event-log retention policy | Passed |
 | Raw-evidence retention policy | Passed |
-| Integrated collector invocation at threshold | Not yet observed |
-| Duplicate suppression after automatic collection | Not yet observed |
-| Expanded configuration-backup coverage | Not yet completed and verified |
+| Integrated collector invocation at threshold | Passed |
+| Duplicate suppression after automatic collection | Passed; count advanced while archive and collection-event totals remained unchanged |
+| Expanded configuration-backup coverage | Passed; 15 sources restored with zero content or metadata mismatches |
 
-The implementation met the state, recording, recovery, service, and retention objectives. The cycle remains open until the evidence-trigger checks and expanded backup verification pass.
+The implementation met the state, recording, evidence, recovery, service, backup, and retention objectives. Cycle 10 is closed.
 
 ## Act
 
@@ -166,17 +166,15 @@ The implementation met the state, recording, recovery, service, and retention ob
 - Retain raw event and incident evidence for 180 days.
 - Keep confirmed causes, corrections, runbooks, and PDCA records permanently in sanitized form.
 
-### Remaining validation
+### Closure validation
 
-Allow a real warning to reach four scheduled occurrences or introduce one controlled failure. Confirm that:
-
-1. exactly one evidence package is created;
-2. the state latch changes to `true`;
-3. another occurrence does not create another package;
-4. recovery clears the latch;
-5. a new episode can create new evidence.
-
-Afterward, expand and verify configuration-backup coverage for the handler, processor, service change, logrotate policy, and tmpfiles policy.
+- A recurring package-update warning crossed the four-occurrence threshold and created exactly one evidence package.
+- The state latch changed to `true` and remained set during continued observations.
+- A subsequent controlled service run advanced the warning count while the archive count and `EVIDENCE_COLLECTED` event count both remained at one.
+- A separate recovered SSH condition produced one `RECOVERED` record and cleared from active state.
+- Backup coverage expanded from 11 to 15 sources, including the handler, processor, logrotate policy, and tmpfiles policy.
+- The new archive passed SHA-256 verification, contained exactly 15 files, and restored all 15 with zero content or metadata mismatches.
+- Final service result was successful, the timer was enabled and active, and zero failed units remained.
 
 ### Standard work and recovery
 
@@ -184,4 +182,4 @@ See [`../runbooks/manage-health-event-processing.md`](../runbooks/manage-health-
 
 ### Recovery point
 
-Snapshot `Health Monitor Retention Verified - 2026-08-17` preserves the verified state at shutdown. Snapshot `20-PDCA10-PreHealthEventHandling` remains the pre-change rollback point.
+Snapshot `21-PDCA10-HealthEventProcessingComplete` preserves the completed state at shutdown. Snapshot `Health Monitor Retention Verified - 2026-08-17` preserves the pre-closure implementation, and snapshot `20-PDCA10-PreHealthEventHandling` remains the Cycle 09 rollback point.

@@ -103,7 +103,7 @@ systemctl is-active apache2
 
 ## Recovery
 
-- If the health-check script itself is damaged, restore only that file from a verified eleven-file configuration backup into an isolated directory first.
+- If the health-check script itself is damaged, restore only that file from the verified 15-source configuration backup into an isolated directory first.
 - Validate restored ownership, mode, contents, and Bash syntax before replacing the live script.
 - If file-level recovery fails, restore snapshot `13-PDCA06-HealthCheckVerified`.
 - To remove the complete Cycle 06 implementation, restore snapshot `12-PDCA06-PreHealthCheck`.

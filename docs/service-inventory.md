@@ -124,7 +124,7 @@ The health check remains available on demand and also runs through a root-owned 
 | Hardening | `NoNewPrivileges`, `PrivateTmp`, `ProtectHome`, and `ProtectSystem=full` |
 | Controlled test | Apache failure detected; evidence preserved; EXIT trap restored Apache and timer |
 | Reboot verification | Timer remained enabled and active; automatic health run completed |
-| Recovery coverage | Service and timer included in the eleven-file configuration backup |
+| Recovery coverage | Service and timer included in the verified 15-source configuration backup |
 
 ## Health-event processing standard
 
@@ -145,7 +145,7 @@ The event handler and processor add no listening service or network port.
 | Event retention | Daily rotation, up to 180 rotations, maximum age 180 days |
 | Raw evidence retention | Files under `/var/log/leanops-incidents` cleaned after 180 days |
 
-Parsing, counting, recovery, permissions, live service execution, and retention passed. The final integrated collector trigger and duplicate-latch behavior remain open validation items.
+Parsing, counting, integrated collection, duplicate suppression, recovery, permissions, live service execution, 15-source backup restoration, and retention passed.
 
 ## Incident-evidence collection standard
 

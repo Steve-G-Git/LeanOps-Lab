@@ -33,7 +33,15 @@ retention policy files: 0644 root:root
 logrotate debug: passed
 tmpfiles cleanup: passed without errors
 
-OPEN VALIDATION
-integrated evidence collection at threshold: not yet observed
-duplicate suppression after automatic collection: not yet observed
-expanded configuration-backup coverage: not yet completed and verified
+CLOSURE VALIDATION
+integrated evidence collection at threshold: passed
+duplicate suppression after automatic collection: passed
+warning count continued after evidence collection: passed
+configuration-backup sources: 15
+archive checksum: passed
+isolated restore sources: 15
+content mismatches: 0
+metadata mismatches: 0
+final service result: success
+timer: enabled and active
+failed units: 0

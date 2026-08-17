@@ -6,9 +6,9 @@ This is a self-directed lab project. It does not represent professional employme
 
 ## Current status
 
-**Status: Active development, 9 PDCA cycles completed; Cycle 10 implemented with final closure checks remaining**
+**Status: Active development, 10 PDCA cycles completed**
 
-Cycle 10 added a locked Bash handler and Python state processor to classify abnormal conditions, count repeated warnings, record recoveries, and prepare automatic evidence collection. Warning evidence is due on the fourth consecutive occurrence; failures are due immediately. Event-log and raw-evidence retention are bounded at 180 days. Counting, recovery, permissions, timer operation, and retention passed. Cycle closure still requires the integrated collector-trigger test, duplicate-suppression verification, and expanded configuration-backup coverage.
+Cycle 10 added a locked Bash handler and Python state processor to classify abnormal conditions, count repeated warnings, record recoveries, and trigger automatic evidence collection. Warning evidence is collected on the fourth consecutive occurrence; failures are collected immediately. Event-log and raw-evidence retention are bounded at 180 days. Integrated collection, duplicate suppression, recovery, permissions, timer operation, 15-source backup and isolated restoration, and retention all passed.
 
 ## Verified outcomes
 
@@ -23,7 +23,7 @@ Cycle 10 added a locked Bash handler and Python state processor to classify abno
 | 07 | Incident evidence required manual collection | Created a sanitized, integrity-checked evidence collector | Healthy and controlled-failure packages verified; Apache failure preserved before automatic rollback; off-VM checks passed |
 | 08 | Detection and evidence controls had not been tested through a complete network incident | Ran a controlled missing-default-route response drill | Failure detected and preserved; route-level cause isolated; staged recovery, fresh SSH, reboot persistence, and four Windows checksums passed |
 | 09 | Health checks depended on manual execution | Added a hardened oneshot service and persistent 15-minute systemd timer | Warning and failure semantics, journal records, controlled detection, rollback, backup recovery, automatic execution, and reboot persistence passed |
-| 10 | Repeated abnormal results had no durable condition state or bounded retention | Added health-event processing, condition counts, recovery records, evidence thresholds, and 180-day retention | Parsing, four-occurrence warning threshold, recovery reset, protected state and event records, timer operation, and retention passed; collector, duplicate-control, and backup closure checks remain open |
+| 10 | Repeated abnormal results had no durable condition state or bounded retention | Added health-event processing, condition counts, recovery records, evidence thresholds, and 180-day retention | Integrated collection, duplicate suppression, recovery reset, protected records, timer operation, 15-source backup restoration, and retention passed |
 
 ## Skills demonstrated
 
@@ -85,7 +85,7 @@ flowchart LR
 - [`docs/pdca/PDCA-07-incident-evidence-collection.md`](docs/pdca/PDCA-07-incident-evidence-collection.md): healthy baseline, controlled incident, evidence sanitization, and verification record
 - [`docs/pdca/PDCA-08-controlled-incident-response.md`](docs/pdca/PDCA-08-controlled-incident-response.md): controlled route failure, evidence-led diagnosis, staged recovery, and persistence record
 - [`docs/pdca/PDCA-09-scheduled-health-monitoring.md`](docs/pdca/PDCA-09-scheduled-health-monitoring.md): scheduled execution, sandbox troubleshooting, failure semantics, rollback, and persistence record
-- [`docs/pdca/PDCA-10-health-event-processing.md`](docs/pdca/PDCA-10-health-event-processing.md): abnormal-condition state, evidence thresholds, recovery tracking, retention, and remaining validation
+- [`docs/pdca/PDCA-10-health-event-processing.md`](docs/pdca/PDCA-10-health-event-processing.md): abnormal-condition state, evidence thresholds, recovery tracking, retention, and verified closure
 - [`docs/runbooks/verify-host-only-connectivity.md`](docs/runbooks/verify-host-only-connectivity.md): standardized connectivity verification
 - [`docs/runbooks/configure-static-host-only-address.md`](docs/runbooks/configure-static-host-only-address.md): repeatable static-address configuration and recovery procedure
 - [`docs/runbooks/configure-ssh-key-authentication.md`](docs/runbooks/configure-ssh-key-authentication.md): safe key setup, hardening, verification, and recovery procedure
@@ -116,4 +116,4 @@ Public evidence will be sanitized before it is added. Passwords, authentication 
 
 ## Next improvement
 
-Complete the remaining Cycle 10 end-to-end trigger test: allow one warning to reach four scheduled occurrences or introduce one controlled failure, confirm exactly one evidence package is created, verify the latch prevents duplicates, and then expand configuration-backup coverage for the new scripts and retention policies. Snapshot `Health Monitor Retention Verified - 2026-08-17` preserves the current verified state.
+Cycle 11 can build on the completed local monitoring pipeline by adding a controlled notification path. The next cycle should define who is notified, which conditions warrant notification, how repeated alerts are suppressed, how delivery failure remains visible, and how the notification path is tested and rolled back. Snapshot `21-PDCA10-HealthEventProcessingComplete` preserves the completed Cycle 10 state.

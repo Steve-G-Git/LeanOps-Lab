@@ -84,15 +84,15 @@ sudo systemd-tmpfiles --clean \
 
 Debug output should report daily rotation, 180 retained rotations, and 180-day maximum age. A successful tmpfiles cleanup may produce no output.
 
-## 7. Complete the remaining evidence-trigger test
+## 7. Verify evidence-trigger and latch behavior
 
 Prefer natural scheduled occurrences. If a controlled failure is required, use the isolated lab only, pause the timer, and guarantee rollback before changing service state.
 
-Confirm one evidence package at the applicable threshold, set `evidence_collected` to `true`, then run one additional occurrence and confirm no duplicate package. Restore the healthy condition and verify a `RECOVERED` event and empty active state.
+Confirm one evidence package at the applicable threshold and verify that `evidence_collected` changes to `true`. Run one additional occurrence and confirm the count advances without another archive or `EVIDENCE_COLLECTED` record. Restore the healthy condition and verify a `RECOVERED` event and empty active state.
 
-## 8. Expand configuration-backup coverage
+## 8. Verify configuration-backup coverage
 
-Before closing Cycle 10, add the handler, processor, modified service unit, logrotate policy, and tmpfiles policy to the root-controlled configuration-backup allowlist. Create a fresh backup and verify its checksum, exact source scope, ownership, permissions, and isolated restoration before treating the new components as recoverable.
+The protected allowlist contains 15 sources, including the handler, processor, service and timer units, logrotate policy, and tmpfiles policy. After any protected configuration change, create a fresh backup and verify its checksum, exact source scope, ownership, permissions, and isolated restoration before treating the new state as recoverable.
 
 Do not mark this step complete from allowlist membership alone. The resulting archive and restore test must both pass.
 
@@ -117,4 +117,4 @@ Check the first reported handler or processor error. Do not delete state or even
 5. Run syntax checks and `systemctl daemon-reload` before re-enabling the timer.
 6. Verify the direct health check, service result, timer state, and failed-unit list.
 
-If file-level recovery is unclear, restore snapshot `Health Monitor Retention Verified - 2026-08-17` for the current verified implementation or `20-PDCA10-PreHealthEventHandling` to return to the Cycle 09 baseline.
+If file-level recovery is unclear, restore snapshot `21-PDCA10-HealthEventProcessingComplete` for the completed implementation, `Health Monitor Retention Verified - 2026-08-17` for the pre-closure implementation, or `20-PDCA10-PreHealthEventHandling` to return to the Cycle 09 baseline.
