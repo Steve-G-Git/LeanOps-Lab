@@ -35,6 +35,8 @@
 | 2026-08-17 | Added 180-day retention for health-event logs and raw incident evidence | Prevent operational records from growing without a defined boundary while preserving two quarters of detail | Logrotate debug reported daily rotation, 180 retained rotations, 180-day maximum age, and no required immediate rotation; tmpfiles cleanup completed without errors; both policies were `644 root:root` | Remove the two retention-policy files after preserving required records, then rerun the relevant configuration loader |
 | 2026-08-17 | Closed Cycle 10 after integrated evidence and recovery verification | Prove threshold collection, duplicate suppression, and recoverability before adopting the new standard | One warning package was collected, continued observations produced no duplicate, backup coverage expanded from 11 to 15 sources, SHA-256 passed, and all 15 files restored with matching content and metadata | Restore `21-PDCA10-HealthEventProcessingComplete`, the pre-closure retention snapshot, or `20-PDCA10-PreHealthEventHandling` according to the required recovery point |
 
+| 2026-08-17 | Added current-state architecture, visual control flow, role-based repository navigation, and Cycle 11 presentation documentation | Make the mature lab understandable quickly without changing the verified server state | Internal links, Mermaid blocks, cycle counts, current-state quantities, roadmap language, and public identifiers were audited | Revert the Cycle 11 repository changes; snapshot `21-PDCA10-HealthEventProcessingComplete` remains the server recovery point |
+
 ## Snapshot checkpoints
 
 | Snapshot | Verified condition |
@@ -61,3 +63,5 @@
 | `19-PDCA09-ScheduledMonitoringComplete` | Scheduled health service and persistent timer, controlled failure handling, eleven-source recovery, off-VM evidence, automatic post-reboot execution, and final clean state verified |
 | `Health Monitor Retention Verified - 2026-08-17` | Health-event handler and processor, protected condition state and event records, scheduled execution, and 180-day retention policies verified; final automatic collector-trigger test remains open |
 | `21-PDCA10-HealthEventProcessingComplete` | Integrated warning evidence, duplicate suppression, recovery recording, 15-source backup and isolated restoration, service success, active timer, zero failed units, and clean shutdown verified |
+
+Cycle 11 changed repository documentation only. No new VM snapshot was required; `21-PDCA10-HealthEventProcessingComplete` remains the current server recovery point.
