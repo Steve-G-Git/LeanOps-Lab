@@ -77,13 +77,13 @@ The backup process does not add a listening service or network port.
 
 | Control | Verified state |
 |---|---|
-| Source definition | Root-controlled eleven-file allowlist |
+| Source definition | Root-controlled fifteen-file allowlist |
 | Backup destination | `/var/backups/leanops` with mode `700` |
 | Backup artifacts | Archive, manifest, and SHA-256 checksum with mode `600` |
 | Scope validation | Approved regular files only; symbolic-link sources rejected |
-| Archive inspection | Exactly eleven expected paths listed |
-| Isolated restore | Eleven byte-for-byte content matches |
-| Restored metadata | Eleven ownership and permission matches |
+| Archive inspection | Exactly fifteen expected paths listed |
+| Isolated restore | Fifteen byte-for-byte content matches |
+| Restored metadata | Fifteen ownership and permission matches |
 | Off-VM verification | SHA-256 comparison passed on Windows |
 | Post-reboot state | Script, allowlist, protected archive, SSH, UFW, networking, and DNS verified |
 
