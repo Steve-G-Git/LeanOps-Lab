@@ -22,7 +22,7 @@
 ## Configuration backup controls
 
 - `/var/backups/leanops` is owned by `root:root` with mode `700`.
-- The root-controlled allowlist has mode `600` and limits each archive to eleven approved regular files.
+- The root-controlled allowlist has mode `600` and limits each archive to fifteen approved regular files.
 - The backup script has mode `700` and rejects absolute paths, parent-directory traversal, missing files, and symbolic-link sources.
 - Archives, manifests, and checksum files have mode `600`.
 - Backup scope excludes private SSH keys, `authorized_keys`, password databases, logs, and machine-specific identifiers.
@@ -49,7 +49,7 @@
 - `NoNewPrivileges=true`, `PrivateTmp=true`, and `ProtectHome=true` reduce service exposure.
 - `ProtectSystem=full` keeps `/usr`, `/boot`, and `/etc` read-only while allowing UFW's required runtime lock under `/run`.
 - Controlled failure testing pauses the timer and uses an EXIT trap to stop Apache and restart scheduling.
-- Both unit files are protected by the eleven-source configuration backup.
+- Both unit files are protected by the fifteen-source configuration backup.
 - Reboot verification confirms timer enablement, activation, and automatic execution.
 
 ## Health-event processing controls
