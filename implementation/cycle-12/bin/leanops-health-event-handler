@@ -1,0 +1,89 @@
+#!/usr/bin/env bash
+
+set -u
+set -o pipefail
+umask 077
+
+health_check="/usr/local/sbin/leanops-health-check"
+processor="/usr/local/sbin/leanops-health-event-processor"
+notifier="/usr/local/sbin/leanops-health-notifier"
+lock_file="/run/leanops-health-event-handler.lock"
+temp_output=""
+
+cleanup() {
+    case "$temp_output" in
+        /tmp/leanops-health-handler.*)
+            rm -f -- "$temp_output"
+            ;;
+    esac
+}
+
+trap cleanup EXIT
+
+for required_file in "$health_check" "$processor" "$notifier"; do
+    if [ ! -x "$required_file" ]; then
+        printf 'HANDLER ERROR: Required program is missing or not executable: %s\n' \
+            "$required_file" >&2
+        exit 3
+    fi
+done
+
+exec 9>"$lock_file" || {
+    printf 'HANDLER ERROR: Cannot open lock file\n' >&2
+    exit 3
+}
+
+if ! flock -w 30 9; then
+    printf 'HANDLER ERROR: Lock unavailable after 30 seconds\n' >&2
+    exit 3
+fi
+
+temp_output="$(mktemp /tmp/leanops-health-handler.XXXXXX)" || {
+    printf 'HANDLER ERROR: Cannot create temporary output file\n' >&2
+    exit 3
+}
+
+"$health_check" >"$temp_output" 2>&1
+health_rc=$?
+
+cat "$temp_output"
+
+case "$health_rc" in
+    0|1|2)
+        ;;
+    *)
+        printf 'HANDLER ERROR: Unexpected health exit code %s\n' \
+            "$health_rc" >&2
+        "$notifier" --pipeline-error "health_check_exit_$health_rc" || true
+        exit 3
+        ;;
+esac
+
+if [ "$health_rc" -ne 0 ]; then
+    printf '\nAbnormal conditions:\n'
+    grep -E '^(WARN|FAIL):' "$temp_output"
+fi
+
+"$processor" "$temp_output" "$health_rc"
+processor_rc=$?
+
+case "$processor_rc" in
+    0|1|2)
+        ;;
+    *)
+        printf 'HANDLER ERROR: Event processor failed with exit code %s\n' \
+            "$processor_rc" >&2
+        "$notifier" --pipeline-error "event_processor_exit_$processor_rc" || true
+        exit 3
+        ;;
+esac
+
+"$notifier"
+notifier_rc=$?
+
+if [ "$notifier_rc" -ne 0 ]; then
+    printf 'HANDLER ERROR: Notification delivery failed; pending work retained\n' >&2
+    exit 3
+fi
+
+exit "$processor_rc"

@@ -1,0 +1,525 @@
+#!/usr/bin/env python3
+
+import json
+import os
+import re
+import subprocess
+import sys
+from datetime import datetime, timezone
+from pathlib import Path
+
+
+CONDITION_PATTERNS = (
+    ("ssh_inactive", r"^SSH is not active$"),
+    ("apache_active", r"^Apache is active but should be inactive$"),
+    ("ufw_inactive", r"^UFW is not active$"),
+    (
+        "ufw_policy_mismatch",
+        r"^UFW default policies do not match the standard$",
+    ),
+    (
+        "ssh_firewall_rule_missing",
+        r"^Required source-restricted SSH firewall rule is missing$",
+    ),
+    ("static_host_address_missing", r"^Static host-only address is missing$"),
+    ("default_route_missing", r"^NAT default route is missing$"),
+    ("internet_unreachable", r"^Internet target is unreachable$"),
+    ("dns_resolution_failed", r"^DNS resolution failed$"),
+    ("root_filesystem_usage", r"^Root filesystem usage is \d+%$"),
+    ("available_memory", r"^Available memory is \d+%$"),
+    (
+        "package_updates",
+        r"^\d+ package updates available in the current APT cache$",
+    ),
+    (
+        "backup_checksum_missing",
+        r"^No configuration-backup checksum file found$",
+    ),
+    (
+        "backup_checksum_failed",
+        r"^Latest configuration backup failed SHA-256 verification$",
+    ),
+)
+
+VALID_HEALTH_CODES = {0, 1, 2}
+STATE_VERSION = 1
+NOTIFICATION_STATE_VERSION = 1
+STATE_PATH = Path("/var/lib/leanops-health-monitor/condition-state.json")
+NOTIFICATION_STATE_PATH = Path(
+    "/var/lib/leanops-health-monitor/notification-state.json"
+)
+EVENT_LOG_PATH = Path("/var/log/leanops-health-events/health-events.tsv")
+NOTIFICATION_LOG_PATH = Path(
+    "/var/log/leanops-health-events/notification-events.tsv"
+)
+WARNING_THRESHOLD = 4
+INCIDENT_COLLECTOR = Path("/usr/local/sbin/leanops-incident-collect")
+
+
+def utc_timestamp() -> str:
+    return datetime.now(timezone.utc).isoformat(
+        timespec="seconds"
+    ).replace("+00:00", "Z")
+
+
+def load_state() -> dict:
+    if not STATE_PATH.exists():
+        return {"version": STATE_VERSION, "active_conditions": {}}
+
+    try:
+        state = json.loads(STATE_PATH.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as error:
+        raise RuntimeError(f"Cannot read condition state: {error}") from error
+
+    if state.get("version") != STATE_VERSION:
+        raise RuntimeError("Unsupported condition-state version")
+    if not isinstance(state.get("active_conditions"), dict):
+        raise RuntimeError("Invalid active_conditions state")
+    return state
+
+
+def load_notification_state() -> dict:
+    if not NOTIFICATION_STATE_PATH.exists():
+        return {
+            "version": NOTIFICATION_STATE_VERSION,
+            "pending": {},
+            "notified_conditions": {},
+        }
+
+    try:
+        state = json.loads(
+            NOTIFICATION_STATE_PATH.read_text(encoding="utf-8")
+        )
+    except (OSError, json.JSONDecodeError) as error:
+        raise RuntimeError(f"Cannot read notification state: {error}") from error
+
+    if state.get("version") != NOTIFICATION_STATE_VERSION:
+        raise RuntimeError("Unsupported notification-state version")
+    if not isinstance(state.get("pending"), dict):
+        raise RuntimeError("Invalid pending notification state")
+    if not isinstance(state.get("notified_conditions"), dict):
+        raise RuntimeError("Invalid notified_conditions state")
+    return state
+
+
+def write_json_atomic(path: Path, value: dict, description: str) -> None:
+    temporary_path = path.with_name(f".{path.name}.{os.getpid()}.tmp")
+
+    try:
+        descriptor = os.open(
+            temporary_path,
+            os.O_WRONLY | os.O_CREAT | os.O_EXCL,
+            0o600,
+        )
+        with os.fdopen(descriptor, "w", encoding="utf-8") as output_file:
+            json.dump(value, output_file, indent=2, sort_keys=True)
+            output_file.write("\n")
+            output_file.flush()
+            os.fsync(output_file.fileno())
+        os.replace(temporary_path, path)
+    except OSError as error:
+        try:
+            temporary_path.unlink()
+        except FileNotFoundError:
+            pass
+        raise RuntimeError(f"Cannot write {description}: {error}") from error
+
+
+def append_events(events: list[dict]) -> None:
+    if not events:
+        return
+
+    try:
+        descriptor = os.open(
+            EVENT_LOG_PATH,
+            os.O_WRONLY | os.O_APPEND | os.O_CREAT,
+            0o600,
+        )
+        needs_header = os.fstat(descriptor).st_size == 0
+        with os.fdopen(descriptor, "a", encoding="utf-8") as event_file:
+            if needs_header:
+                event_file.write(
+                    "timestamp\tevent_type\tcondition_id\tseverity\t"
+                    "consecutive_count\tmessage\n"
+                )
+            for event in events:
+                message = event["message"].replace("\t", " ").replace("\n", " ")
+                event_file.write(
+                    f"{event['timestamp']}\t{event['event_type']}\t"
+                    f"{event['condition_id']}\t{event['severity']}\t"
+                    f"{event['consecutive_count']}\t{message}\n"
+                )
+            event_file.flush()
+            os.fsync(event_file.fileno())
+    except OSError as error:
+        raise RuntimeError(f"Cannot append health event: {error}") from error
+
+
+def append_notification_queue_events(events: list[dict]) -> None:
+    if not events:
+        return
+
+    try:
+        descriptor = os.open(
+            NOTIFICATION_LOG_PATH,
+            os.O_WRONLY | os.O_APPEND | os.O_CREAT,
+            0o600,
+        )
+        needs_header = os.fstat(descriptor).st_size == 0
+        with os.fdopen(descriptor, "a", encoding="utf-8") as log_file:
+            if needs_header:
+                log_file.write(
+                    "timestamp\tevent_type\tcondition_id\t"
+                    "notification_type\tdetail\n"
+                )
+            for event in events:
+                detail = event["detail"].replace("\t", " ").replace("\n", " ")
+                log_file.write(
+                    f"{event['timestamp']}\t{event['event_type']}\t"
+                    f"{event['condition_id']}\t"
+                    f"{event['notification_type']}\t{detail}\n"
+                )
+            log_file.flush()
+            os.fsync(log_file.fileno())
+    except OSError as error:
+        raise RuntimeError(f"Cannot append notification event: {error}") from error
+
+
+def update_condition_state(
+    state: dict,
+    conditions: list[dict[str, str]],
+) -> tuple[list[dict], list[dict]]:
+    timestamp = utc_timestamp()
+    previous_active = state["active_conditions"]
+    current_active = {}
+    events = []
+    evidence_due = []
+
+    for condition in conditions:
+        condition_id = condition["condition_id"]
+        severity = condition["severity"]
+        previous = previous_active.get(condition_id)
+
+        if previous and previous.get("severity") == severity:
+            consecutive_count = previous["consecutive_count"] + 1
+            first_seen = previous["first_seen"]
+            evidence_collected = previous.get("evidence_collected", False)
+        else:
+            consecutive_count = 1
+            first_seen = timestamp
+            evidence_collected = False
+
+        record = {
+            "severity": severity,
+            "consecutive_count": consecutive_count,
+            "first_seen": first_seen,
+            "last_seen": timestamp,
+            "last_message": condition["message"],
+            "evidence_collected": evidence_collected,
+        }
+        current_active[condition_id] = record
+        events.append(
+            {
+                "timestamp": timestamp,
+                "event_type": "OBSERVED",
+                "condition_id": condition_id,
+                "severity": severity,
+                "consecutive_count": consecutive_count,
+                "message": condition["message"],
+                "first_seen": first_seen,
+                "last_seen": timestamp,
+                "evidence_collected": evidence_collected,
+            }
+        )
+
+        if not evidence_collected and (
+            severity == "FAIL"
+            or (severity == "WARN" and consecutive_count >= WARNING_THRESHOLD)
+        ):
+            evidence_due.append(
+                {
+                    "condition_id": condition_id,
+                    "severity": severity,
+                    "consecutive_count": consecutive_count,
+                }
+            )
+
+    for condition_id, previous in previous_active.items():
+        if condition_id in current_active:
+            continue
+        events.append(
+            {
+                "timestamp": timestamp,
+                "event_type": "RECOVERED",
+                "condition_id": condition_id,
+                "severity": previous["severity"],
+                "consecutive_count": previous["consecutive_count"],
+                "message": previous["last_message"],
+                "first_seen": previous["first_seen"],
+                "last_seen": timestamp,
+                "evidence_collected": previous.get("evidence_collected", False),
+            }
+        )
+
+    state["active_conditions"] = current_active
+    return events, evidence_due
+
+
+def collect_evidence(item: dict) -> str:
+    if not INCIDENT_COLLECTOR.is_file():
+        raise RuntimeError("Incident collector is missing")
+
+    label = f"health-{item['condition_id']}-{item['severity'].lower()}"
+    try:
+        result = subprocess.run(
+            [str(INCIDENT_COLLECTOR), label],
+            text=True,
+            capture_output=True,
+            check=False,
+            timeout=300,
+        )
+    except (OSError, subprocess.TimeoutExpired) as error:
+        raise RuntimeError(f"Cannot run incident collector: {error}") from error
+
+    collector_output = "\n".join(
+        part.strip()
+        for part in (result.stdout, result.stderr)
+        if part.strip()
+    )
+    if collector_output:
+        print(collector_output)
+    if result.returncode != 0:
+        raise RuntimeError(
+            f"Incident collector returned exit code {result.returncode}"
+        )
+    return label
+
+
+def notification_item(event: dict, notification_type: str) -> dict:
+    return {
+        "condition_id": event["condition_id"],
+        "notification_type": notification_type,
+        "severity": event["severity"],
+        "message": event["message"],
+        "consecutive_count": event["consecutive_count"],
+        "first_seen": event["first_seen"],
+        "last_seen": event["last_seen"],
+        "evidence_collected": event.get("evidence_collected", False),
+        "queued_at": utc_timestamp(),
+    }
+
+
+def queue_notifications(
+    notification_state: dict,
+    events: list[dict],
+) -> list[dict]:
+    queue_events = []
+    pending = notification_state["pending"]
+    notified = notification_state["notified_conditions"]
+
+    for event in events:
+        condition_id = event["condition_id"]
+        if event["event_type"] == "OBSERVED":
+            notification_due = (
+                event["severity"] == "FAIL"
+            ) or (
+                event["severity"] == "WARN"
+                and event["consecutive_count"] >= WARNING_THRESHOLD
+            )
+            previous_notice = notified.get(condition_id, {})
+            already_notified_at_severity = (
+                previous_notice.get("severity") == event["severity"]
+            )
+            if (
+                notification_due
+                and condition_id not in pending
+                and not already_notified_at_severity
+            ):
+                pending[condition_id] = notification_item(event, "ALERT")
+                queue_events.append(
+                    {
+                        "timestamp": utc_timestamp(),
+                        "event_type": "QUEUED",
+                        "condition_id": condition_id,
+                        "notification_type": "ALERT",
+                        "detail": "Condition reached its notification threshold",
+                    }
+                )
+            continue
+
+        if event["event_type"] != "RECOVERED":
+            continue
+
+        existing = pending.get(condition_id)
+        if existing and existing.get("notification_type") == "ALERT":
+            pending[condition_id] = notification_item(
+                event,
+                "ALERT_RECOVERED",
+            )
+            queue_events.append(
+                {
+                    "timestamp": utc_timestamp(),
+                    "event_type": "COALESCED",
+                    "condition_id": condition_id,
+                    "notification_type": "ALERT_RECOVERED",
+                    "detail": "Unsent alert recovered before delivery",
+                }
+            )
+        elif condition_id in notified:
+            pending[condition_id] = notification_item(event, "RECOVERY")
+            queue_events.append(
+                {
+                    "timestamp": utc_timestamp(),
+                    "event_type": "QUEUED",
+                    "condition_id": condition_id,
+                    "notification_type": "RECOVERY",
+                    "detail": "Previously notified condition recovered",
+                }
+            )
+
+    return queue_events
+
+
+def identify_condition(message: str) -> str | None:
+    for condition_id, pattern in CONDITION_PATTERNS:
+        if re.fullmatch(pattern, message):
+            return condition_id
+    return None
+
+
+def parse_abnormal_conditions(health_output: str) -> list[dict[str, str]]:
+    conditions = []
+    for line in health_output.splitlines():
+        match = re.fullmatch(r"(WARN|FAIL):\s+(.+)", line)
+        if match is None:
+            continue
+        severity, message = match.groups()
+        condition_id = identify_condition(message)
+        if condition_id is None:
+            raise ValueError(f"Unknown abnormal condition: {line}")
+        conditions.append(
+            {
+                "condition_id": condition_id,
+                "severity": severity,
+                "message": message,
+            }
+        )
+    return conditions
+
+
+def expected_code(conditions: list[dict[str, str]]) -> int:
+    severities = {condition["severity"] for condition in conditions}
+    if "FAIL" in severities:
+        return 2
+    if "WARN" in severities:
+        return 1
+    return 0
+
+
+def main() -> int:
+    if len(sys.argv) != 3:
+        print(
+            "PROCESSOR ERROR: Expected output-file path and health exit code",
+            file=sys.stderr,
+        )
+        return 3
+
+    output_path = Path(sys.argv[1])
+    try:
+        health_code = int(sys.argv[2])
+    except ValueError:
+        print("PROCESSOR ERROR: Health exit code is not an integer", file=sys.stderr)
+        return 3
+
+    if health_code not in VALID_HEALTH_CODES:
+        print(
+            f"PROCESSOR ERROR: Unexpected health exit code {health_code}",
+            file=sys.stderr,
+        )
+        return 3
+    if not output_path.is_file():
+        print("PROCESSOR ERROR: Health output file is missing", file=sys.stderr)
+        return 3
+
+    try:
+        health_output = output_path.read_text(encoding="utf-8")
+        conditions = parse_abnormal_conditions(health_output)
+        state = load_state()
+    except OSError as error:
+        print(f"PROCESSOR ERROR: Cannot read health output: {error}", file=sys.stderr)
+        return 3
+    except (ValueError, RuntimeError) as error:
+        print(f"PROCESSOR ERROR: {error}", file=sys.stderr)
+        return 3
+
+    parsed_code = expected_code(conditions)
+    if health_code != parsed_code:
+        print(
+            f"PROCESSOR ERROR: Health exit code {health_code} "
+            f"does not match parsed result {parsed_code}",
+            file=sys.stderr,
+        )
+        return 3
+
+    try:
+        events, evidence_due = update_condition_state(state, conditions)
+        for item in evidence_due:
+            print(
+                f"PROCESSOR: Collecting evidence for {item['severity']} "
+                f"condition {item['condition_id']} at occurrence "
+                f"{item['consecutive_count']}"
+            )
+            label = collect_evidence(item)
+            active_record = state["active_conditions"][item["condition_id"]]
+            active_record["evidence_collected"] = True
+            for event in events:
+                if (
+                    event["event_type"] == "OBSERVED"
+                    and event["condition_id"] == item["condition_id"]
+                ):
+                    event["evidence_collected"] = True
+            events.append(
+                {
+                    "timestamp": utc_timestamp(),
+                    "event_type": "EVIDENCE_COLLECTED",
+                    "condition_id": item["condition_id"],
+                    "severity": item["severity"],
+                    "consecutive_count": item["consecutive_count"],
+                    "message": f"Incident evidence label: {label}",
+                    "first_seen": active_record["first_seen"],
+                    "last_seen": active_record["last_seen"],
+                    "evidence_collected": True,
+                }
+            )
+
+        # Health state and evidence history are durable before notification work.
+        write_json_atomic(STATE_PATH, state, "condition state")
+        append_events(events)
+
+        notification_state = load_notification_state()
+        queue_events = queue_notifications(notification_state, events)
+        if queue_events:
+            write_json_atomic(
+                NOTIFICATION_STATE_PATH,
+                notification_state,
+                "notification state",
+            )
+            append_notification_queue_events(queue_events)
+    except RuntimeError as error:
+        print(f"PROCESSOR ERROR: {error}", file=sys.stderr)
+        return 3
+
+    print(
+        f"PROCESSOR: Accepted health result {health_code} "
+        f"with {len(health_output.splitlines())} output lines"
+    )
+    for condition in conditions:
+        print(
+            f"PROCESSOR: Identified {condition['severity']} "
+            f"condition {condition['condition_id']}"
+        )
+    return health_code
+
+
+if __name__ == "__main__":
+    sys.exit(main())

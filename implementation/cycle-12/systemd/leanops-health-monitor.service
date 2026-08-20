@@ -1,0 +1,19 @@
+[Unit]
+Description=LeanOps scheduled server health check
+Documentation=https://github.com/Steve-G-Git/LeanOps-Lab
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=root
+Group=root
+ExecStart=/usr/local/sbin/leanops-health-event-handler
+SuccessExitStatus=1 2
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=leanops-health-monitor
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=full

@@ -1,0 +1,292 @@
+#!/usr/bin/env python3
+
+import json
+import os
+import subprocess
+import sys
+from datetime import datetime, timezone
+from email.message import EmailMessage
+from pathlib import Path
+
+
+STATE_VERSION = 1
+NOTIFICATION_STATE_PATH = Path(
+    "/var/lib/leanops-health-monitor/notification-state.json"
+)
+NOTIFICATION_LOG_PATH = Path(
+    "/var/log/leanops-health-events/notification-events.tsv"
+)
+SMTP_CONFIG_PATH = Path("/etc/leanops-health-notify.conf")
+MSMTP_PATH = Path("/usr/bin/msmtp")
+
+
+def utc_timestamp() -> str:
+    return datetime.now(timezone.utc).isoformat(
+        timespec="seconds"
+    ).replace("+00:00", "Z")
+
+
+def load_state() -> dict:
+    if not NOTIFICATION_STATE_PATH.exists():
+        return {
+            "version": STATE_VERSION,
+            "pending": {},
+            "notified_conditions": {},
+        }
+
+    try:
+        state = json.loads(
+            NOTIFICATION_STATE_PATH.read_text(encoding="utf-8")
+        )
+    except (OSError, json.JSONDecodeError) as error:
+        raise RuntimeError(f"Cannot read notification state: {error}") from error
+
+    if state.get("version") != STATE_VERSION:
+        raise RuntimeError("Unsupported notification-state version")
+
+    if not isinstance(state.get("pending"), dict):
+        raise RuntimeError("Invalid pending notification state")
+
+    if not isinstance(state.get("notified_conditions"), dict):
+        raise RuntimeError("Invalid notified_conditions state")
+
+    return state
+
+
+def write_state(state: dict) -> None:
+    temporary_path = NOTIFICATION_STATE_PATH.with_name(
+        f".{NOTIFICATION_STATE_PATH.name}.{os.getpid()}.tmp"
+    )
+
+    try:
+        descriptor = os.open(
+            temporary_path,
+            os.O_WRONLY | os.O_CREAT | os.O_EXCL,
+            0o600,
+        )
+
+        with os.fdopen(descriptor, "w", encoding="utf-8") as state_file:
+            json.dump(state, state_file, indent=2, sort_keys=True)
+            state_file.write("\n")
+            state_file.flush()
+            os.fsync(state_file.fileno())
+
+        os.replace(temporary_path, NOTIFICATION_STATE_PATH)
+    except OSError as error:
+        try:
+            temporary_path.unlink()
+        except FileNotFoundError:
+            pass
+        raise RuntimeError(f"Cannot write notification state: {error}") from error
+
+
+def append_log(event_type: str, items: list[dict], detail: str) -> None:
+    timestamp = utc_timestamp()
+
+    try:
+        descriptor = os.open(
+            NOTIFICATION_LOG_PATH,
+            os.O_WRONLY | os.O_APPEND | os.O_CREAT,
+            0o600,
+        )
+        needs_header = os.fstat(descriptor).st_size == 0
+
+        with os.fdopen(descriptor, "a", encoding="utf-8") as log_file:
+            if needs_header:
+                log_file.write(
+                    "timestamp\tevent_type\tcondition_id\t"
+                    "notification_type\tdetail\n"
+                )
+
+            safe_detail = detail.replace("\t", " ").replace("\n", " ")
+            for item in items:
+                log_file.write(
+                    f"{timestamp}\t{event_type}\t"
+                    f"{item['condition_id']}\t{item['notification_type']}\t"
+                    f"{safe_detail}\n"
+                )
+
+            log_file.flush()
+            os.fsync(log_file.fileno())
+    except OSError as error:
+        raise RuntimeError(f"Cannot append notification event: {error}") from error
+
+
+def read_config_value(name: str) -> str:
+    try:
+        lines = SMTP_CONFIG_PATH.read_text(encoding="utf-8").splitlines()
+    except OSError as error:
+        raise RuntimeError(f"Cannot read SMTP configuration: {error}") from error
+
+    for raw_line in lines:
+        line = raw_line.strip()
+        if not line or line.startswith("#"):
+            continue
+        parts = line.split(None, 1)
+        if len(parts) == 2 and parts[0] == name:
+            return parts[1].strip().strip('"')
+
+    raise RuntimeError(f"SMTP configuration is missing {name}")
+
+
+def build_message(items: list[dict], recipient: str) -> EmailMessage:
+    host_label = os.uname().nodename
+    message = EmailMessage()
+    message["From"] = recipient
+    message["To"] = recipient
+    message["Subject"] = (
+        f"LeanOps-Lab health notification: {len(items)} condition(s)"
+    )
+
+    lines = [
+        "LeanOps-Lab health notification",
+        f"System: {host_label}",
+        f"Generated: {utc_timestamp()}",
+        f"Conditions in this message: {len(items)}",
+        "",
+    ]
+
+    for number, item in enumerate(items, start=1):
+        lines.extend(
+            [
+                f"Condition {number}",
+                f"Notification: {item['notification_type']}",
+                f"Condition ID: {item['condition_id']}",
+                f"Severity: {item['severity']}",
+                f"Message: {item['message']}",
+                f"Consecutive count: {item['consecutive_count']}",
+                f"First seen: {item['first_seen']}",
+                f"Latest seen: {item['last_seen']}",
+                "Evidence collected: "
+                f"{'yes' if item.get('evidence_collected') else 'no'}",
+                f"Queued: {item['queued_at']}",
+                "",
+            ]
+        )
+
+    lines.extend(
+        [
+            "Next action: Review the health event log and available incident evidence.",
+            "No evidence files are attached to this message.",
+        ]
+    )
+    message.set_content("\n".join(lines))
+    return message
+
+
+def send_message(message: EmailMessage, recipient: str) -> None:
+    if not MSMTP_PATH.is_file():
+        raise RuntimeError("msmtp is missing")
+    if not SMTP_CONFIG_PATH.is_file():
+        raise RuntimeError("SMTP configuration is missing")
+
+    try:
+        result = subprocess.run(
+            [
+                str(MSMTP_PATH),
+                f"--file={SMTP_CONFIG_PATH}",
+                recipient,
+            ],
+            input=message.as_bytes(),
+            capture_output=True,
+            check=False,
+            timeout=60,
+        )
+    except (OSError, subprocess.TimeoutExpired) as error:
+        raise RuntimeError(f"Cannot run msmtp: {error}") from error
+
+    if result.returncode != 0:
+        stderr = result.stderr.decode("utf-8", errors="replace").strip()
+        detail = stderr.splitlines()[-1] if stderr else "no diagnostic output"
+        raise RuntimeError(
+            f"msmtp returned exit code {result.returncode}: {detail}"
+        )
+
+
+def mark_sent(state: dict, items: list[dict]) -> None:
+    for item in items:
+        condition_id = item["condition_id"]
+        notification_type = item["notification_type"]
+
+        if notification_type == "ALERT":
+            state["notified_conditions"][condition_id] = {
+                "severity": item["severity"],
+                "notified_at": utc_timestamp(),
+                "message": item["message"],
+            }
+        else:
+            state["notified_conditions"].pop(condition_id, None)
+
+        state["pending"].pop(condition_id, None)
+
+
+def queue_pipeline_error(state: dict, detail: str) -> None:
+    timestamp = utc_timestamp()
+    state["pending"]["monitoring_pipeline"] = {
+        "condition_id": "monitoring_pipeline",
+        "notification_type": "PIPELINE_ERROR",
+        "severity": "ERROR",
+        "message": f"Monitoring pipeline error: {detail}",
+        "consecutive_count": 1,
+        "first_seen": timestamp,
+        "last_seen": timestamp,
+        "evidence_collected": False,
+        "queued_at": timestamp,
+    }
+    write_state(state)
+    append_log(
+        "QUEUED",
+        [state["pending"]["monitoring_pipeline"]],
+        "Immediate monitoring pipeline error",
+    )
+
+
+def main() -> int:
+    try:
+        state = load_state()
+    except RuntimeError as error:
+        print(f"NOTIFIER ERROR: {error}", file=sys.stderr)
+        return 3
+
+    if len(sys.argv) == 3 and sys.argv[1] == "--pipeline-error":
+        try:
+            queue_pipeline_error(state, sys.argv[2])
+        except RuntimeError as error:
+            print(f"NOTIFIER ERROR: {error}", file=sys.stderr)
+            return 3
+    elif len(sys.argv) != 1:
+        print(
+            "NOTIFIER ERROR: Expected no arguments or --pipeline-error DETAIL",
+            file=sys.stderr,
+        )
+        return 3
+
+    items = list(state["pending"].values())
+    if not items:
+        print("NOTIFIER: No pending notifications")
+        return 0
+
+    items.sort(key=lambda item: (item["queued_at"], item["condition_id"]))
+
+    try:
+        recipient = read_config_value("from")
+        message = build_message(items, recipient)
+        send_message(message, recipient)
+        mark_sent(state, items)
+        write_state(state)
+        append_log("SENT", items, "Grouped SMTP delivery succeeded")
+    except RuntimeError as error:
+        try:
+            append_log("SEND_FAILED", items, str(error))
+        except RuntimeError as log_error:
+            print(f"NOTIFIER ERROR: {log_error}", file=sys.stderr)
+        print(f"NOTIFIER ERROR: {error}", file=sys.stderr)
+        print("NOTIFIER: Pending notifications retained for retry", file=sys.stderr)
+        return 3
+
+    print(f"NOTIFIER: Sent one message containing {len(items)} condition(s)")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
