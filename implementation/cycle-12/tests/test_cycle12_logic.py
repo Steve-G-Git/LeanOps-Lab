@@ -7,7 +7,10 @@ from pathlib import Path
 import tempfile
 
 
-BASE = Path(__file__).parent
+TEST_DIRECTORY = Path(__file__).parent
+BASE = TEST_DIRECTORY.parent / "bin"
+if not BASE.is_dir():
+    BASE = TEST_DIRECTORY
 
 
 def load_module(name: str, filename: str):
