@@ -37,6 +37,8 @@
 
 | 2026-08-17 | Added current-state architecture, visual control flow, role-based repository navigation, and Cycle 11 presentation documentation | Make the mature lab understandable quickly without changing the verified server state | Internal links, Mermaid blocks, cycle counts, current-state quantities, roadmap language, and public identifiers were audited | Revert the Cycle 11 repository changes; snapshot `21-PDCA10-HealthEventProcessingComplete` remains the server recovery point |
 
+| 2026-08-20 | Added controlled grouped SMTP notifications, retry state, recovery messages, duplicate suppression, and notification-log retention | Make alert-worthy health transitions visible without emailing every repeated warning | Six logic tests, live delivery, duplicate suppression, protected records, service and timer checks, and corrected 180-day logrotate validation passed | Restore `/root/leanops-cycle12-rollback` and reload systemd, or restore `22-PDCA12-PreEmailNotifications` |
+
 ## Snapshot checkpoints
 
 | Snapshot | Verified condition |
