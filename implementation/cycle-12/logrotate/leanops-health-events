@@ -1,5 +1,4 @@
-/var/log/leanops-health-events/health-events.tsv
-/var/log/leanops-health-events/notification-events.tsv {
+/var/log/leanops-health-events/health-events.tsv /var/log/leanops-health-events/notification-events.tsv {
     daily
     rotate 180
     maxage 180
