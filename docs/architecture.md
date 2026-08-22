@@ -2,9 +2,9 @@
 
 ## Purpose
 
-This document provides the current-state view of LeanOps-Lab after Cycle 11. It explains how the isolated network, security controls, scheduled monitoring, event processing, evidence collection, retention, backup, and recovery controls fit together.
+This document provides the current-state view of LeanOps-Lab after Cycle 12. It explains how the isolated network, security controls, scheduled monitoring, event processing, evidence collection, controlled notification, retention, backup, and recovery controls fit together.
 
-The architecture reflects verified work through Cycle 10. Cycle 11 changed presentation and navigation only; it did not modify the server or its operational state.
+The architecture reflects the verified operational standard through Cycle 12. Notification delivery extends beyond the VM through an authenticated TLS SMTP relay, while condition state, evidence, retry state, and notification records remain protected locally.
 
 ## Network boundary
 
@@ -37,11 +37,15 @@ flowchart TD
     Health --> Processor["Python processor<br/>validate and classify"]
     Processor --> State["Condition state JSON"]
     Processor --> Events["Health-event TSV"]
-    Processor --> Threshold{"Collection threshold"}
+    Processor --> Threshold{"Evidence threshold"}
     Threshold -->|"WARN x4"| Collector["Incident collector"]
     Threshold -->|"FAIL x1"| Collector
-    Threshold -->|"Not due"| End["Record and exit"]
     Collector --> Package["Manifest, archive, SHA-256"]
+    Processor --> Notify{"Notification transition"}
+    Notify -->|"Alert or recovery"| Notifier["Python notifier"]
+    Notify -->|"Duplicate"| End["Record and exit"]
+    Notifier --> SMTP["Authenticated TLS SMTP relay"]
+    Notifier --> NotifyState["Notification state and TSV"]
 ```
 
 ### Component responsibilities
@@ -54,6 +58,7 @@ flowchart TD
 | `leanops-health-check` | Tests required services, firewall, networking, resources, updates, and backup integrity | Returns `0`, `1`, or `2` for healthy, warning, or failure state |
 | `leanops-health-event-processor` | Validates results, assigns stable condition IDs, updates state, records events, and decides whether evidence is due | Unknown or inconsistent input returns code `3` |
 | `leanops-incident-collect` | Collects a bounded, sanitized diagnostic package | Manifest records command exit codes; package receives a checksum |
+| `leanops-health-notifier` | Groups alert-worthy transitions, sends one SMTP message, records delivery, and retains failed sends for retry | Delivery failure remains pending and returns a visible pipeline error |
 
 ## Condition lifecycle
 
@@ -83,12 +88,14 @@ stateDiagram-v2
 | Active condition state | Root-controlled state directory | Directory `0700`; file `0600`; atomic replacement | Active operational state |
 | Health-event history | Root-controlled log directory | Directory `0700`; file `0600` | Daily rotation; maximum 180 days; older rotations compressed |
 | Incident packages | Root-controlled incident directory | Directory `0700`; artifacts `0600`; SHA-256 sidecar | Maximum 180 days |
+| Notification state and event history | Root-controlled state and log directories | Files `0600`; atomic state replacement; no credential values recorded | Daily log rotation; maximum 180 days |
+| SMTP client configuration | Root-controlled configuration file | Mode `0600`; excluded from Git and configuration backups | Active secret-bearing configuration |
 | Configuration backups | Root-controlled backup directory | Allowlisted sources; archives, manifests, and checksums `0600` | Retained as controlled recovery artifacts |
 | PDCA records and runbooks | Git repository | Sanitized, reviewed, and versioned | Permanent project knowledge |
 
 ## Backup and recovery boundary
 
-The configuration backup protects fifteen approved sources, including network, SSH, firewall, health-check, evidence, handler, processor, service, timer, and retention-policy files. It is not a full-system backup.
+The configuration backup protects seventeen approved non-secret sources, including network, SSH, firewall, health-check, evidence, handler, processor, notifier, service, timer, retention-policy, and local AppArmor policy files. The secret-bearing SMTP configuration is intentionally excluded. This is not a full-system backup.
 
 Recovery is layered:
 
@@ -101,7 +108,7 @@ Recovery is layered:
 
 | Lean objective | Technical control |
 |---|---|
-| See the abnormal condition | Explicit warning, failure, recovery, and pipeline-error states |
+| See the abnormal condition | Explicit warning, failure, recovery, delivery, and pipeline-error states |
 | Avoid reaction to one noisy signal | Four-consecutive-occurrence warning threshold |
 | Never hide a defect | Every abnormal occurrence is tallied; pipeline errors fail visibly |
 | Avoid repeated waste | Duplicate evidence is suppressed until recovery |
@@ -111,9 +118,9 @@ Recovery is layered:
 
 ## Current limitations
 
-- Monitoring and notification remain local to the VM.
+- SMTP notifications depend on an external relay and outbound internet access; local event and retry records preserve visibility when delivery fails.
 - The Windows backup is off-VM but is not yet a separate encrypted or versioned off-site copy.
 - The incident collector is bounded and sanitized for observed risks, not a universal data-loss-prevention system.
 - The lab contains one managed server and one administrative workstation, not a production monitoring fleet.
 
-These limitations define logical future PDCA work. Notification is the planned Cycle 12 improvement.
+These limitations define logical future PDCA work. Any next cycle should address a newly observed problem rather than extend the system without evidence of need.
