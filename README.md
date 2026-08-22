@@ -125,4 +125,4 @@ Windows 11, Oracle VirtualBox, Ubuntu Server, OpenSSH, Apache, UFW, Nmap, PowerS
 
 ## Next improvement
 
-Cycle 12 is verified and closed on its feature branch. The next improvement should be selected only after branch review and promotion of the controlled notification standard. Snapshot `23-PDCA12-EmailNotificationsVerified` is the current verified server recovery point.
+Cycle 12 is verified, merged into `main`, and closed. Snapshot `23-PDCA12-EmailNotificationsVerified` is the current verified server recovery point. The next PDCA cycle should begin only after selecting a new observed problem with measurable success criteria, validation, and rollback.
