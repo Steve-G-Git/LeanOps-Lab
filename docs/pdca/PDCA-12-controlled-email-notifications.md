@@ -6,7 +6,7 @@ Cycle 12 extends the local health-monitoring pipeline with controlled SMTP notif
 
 Warnings are tallied without email for the first three consecutive observations. Observation four queues one alert and evidence. Failures queue an alert and evidence immediately. Continued conditions are recorded without duplicate messages, while recovery generates one notification. Different conditions from the same run are grouped into one email but remain visibly separate.
 
-The state-transition tests, live delivery, duplicate suppression, retry retention, recovery handling, protected file permissions, service integration, timer operation, 180-day log retention, backup expansion, SHA-256 verification, isolated restoration, and final recovery checkpoint passed. Cycle 12 is verified and closed on its feature branch pending normal review before merge.
+The state-transition tests, live delivery, duplicate suppression, retry retention, recovery handling, protected file permissions, service integration, timer operation, 180-day log retention, backup expansion, SHA-256 verification, isolated restoration, and final recovery checkpoint passed. Cycle 12 is verified, merged into `main`, and closed.
 
 ## Plan
 
