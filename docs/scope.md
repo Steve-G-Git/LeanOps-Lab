@@ -24,7 +24,9 @@ The initial milestone intentionally excluded dashboards, automation, virtual rou
 - Protected configuration backup and isolated restoration
 - Repeatable server health checks and scheduled monitoring
 - Health-event processing, condition state, recovery records, and evidence thresholds
-- Bounded log and raw-evidence retention
+- Grouped authenticated SMTP notifications for alert and recovery transitions
+- Notification duplicate suppression, protected delivery state, and retry after delivery failure
+- Bounded health, notification, and raw-evidence retention
 - Controlled failure testing and incident response
 - Rollback planning and VirtualBox snapshots
 - Repeatable runbooks and sanitized technical evidence
@@ -39,7 +41,7 @@ The initial milestone intentionally excluded dashboards, automation, virtual rou
 - A production monitoring or alerting platform
 - Claims that lab work represents professional IT employment
 
-Future dashboards, notifications, additional network segments, or centralized logging require a separate PDCA cycle with a defined problem, success criteria, risk controls, and rollback plan.
+Future dashboards, additional network segments, centralized logging, or production-scale alerting require a separate PDCA cycle with a defined problem, success criteria, risk controls, and rollback plan.
 
 ## Safety boundaries
 
