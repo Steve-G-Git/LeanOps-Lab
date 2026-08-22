@@ -1,12 +1,12 @@
 # PDCA 12 notification implementation
 
 This directory contains the sanitized implementation for controlled
-LeanOps-Lab health notifications. Server-side acceptance testing has passed;
-final backup and recovery-checkpoint work remains before the cycle is closed.
+LeanOps-Lab health notifications. Server-side acceptance, expanded backup
+coverage, isolated restoration, and the final recovery checkpoint passed.
 
-The code remains isolated on the `pdca-12-email-notifications` branch until
-backup restoration, final recovery, and public-data audits are complete. It contains no email address,
-SMTP login, SMTP key, IP address, or live notification configuration.
+The verified code remains isolated on the `pdca-12-email-notifications` branch
+for normal review before merge. It contains no email address, SMTP login, SMTP
+key, IP address, or live notification configuration.
 
 ## Layout
 
@@ -39,10 +39,11 @@ at `/etc/leanops-health-notify.conf` with mode `0600 root:root`.
 
 Six controlled logic tests, live SMTP delivery, duplicate suppression, retry
 retention, protected notification records, service integration, timer
-operation, and corrected 180-day log rotation passed.
+operation, corrected 180-day log rotation, 17-source backup coverage,
+SHA-256 verification, and a 17-of-17 isolated restore passed.
 
 ## Promotion boundary
 
-Do not merge this branch into `main` until non-secret backup coverage and
-isolated restoration pass, the final recovery checkpoint is preserved, and the
-full branch passes its public-data audit.
+Cycle 12 is verified and closed on this feature branch. Merge into `main` only
+after normal branch review confirms the documented behavior, sanitized public
+evidence, and intended repository scope.
