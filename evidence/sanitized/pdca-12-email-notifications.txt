@@ -58,3 +58,29 @@ logrotate service: success
 CORRECTIONS
 cross-platform CRLF detected by syntax checks: corrected and retested
 invalid multi-path rotation declaration: corrected and retested
+
+BACKUP AND RESTORE
+protected backup sources: 17
+duplicate allowlist entries: 0
+notifier included: yes
+AppArmor local rule included: yes
+SMTP credential configuration included: no
+fresh backup SHA-256: passed
+isolated archive extraction: passed
+expected sources: 17
+restored sources: 17
+missing files: 0
+content mismatches: 0
+metadata mismatches: 0
+secret configuration restored: no
+
+FINAL ACCEPTANCE
+service start: passed
+timer enabled: yes
+timer active: yes
+condition state JSON: valid
+notification state JSON: valid
+logrotate validation: passed
+failed units: 0
+final recovery snapshot: 23-PDCA12-EmailNotificationsVerified
+cycle status: verified and closed on feature branch
