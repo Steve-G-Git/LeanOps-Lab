@@ -77,13 +77,13 @@ The backup process does not add a listening service or network port.
 
 | Control | Verified state |
 |---|---|
-| Source definition | Root-controlled fifteen-file allowlist |
+| Source definition | Root-controlled seventeen-file allowlist |
 | Backup destination | `/var/backups/leanops` with mode `700` |
 | Backup artifacts | Archive, manifest, and SHA-256 checksum with mode `600` |
 | Scope validation | Approved regular files only; symbolic-link sources rejected |
-| Archive inspection | Exactly fifteen expected paths listed |
-| Isolated restore | Fifteen byte-for-byte content matches |
-| Restored metadata | Fifteen ownership and permission matches |
+| Archive inspection | Exactly seventeen expected paths listed |
+| Isolated restore | Seventeen byte-for-byte content matches |
+| Restored metadata | Seventeen ownership and permission matches |
 | Off-VM verification | SHA-256 comparison passed on Windows |
 | Post-reboot state | Script, allowlist, protected archive, SSH, UFW, networking, and DNS verified |
 
@@ -124,7 +124,7 @@ The health check remains available on demand and also runs through a root-owned 
 | Hardening | `NoNewPrivileges`, `PrivateTmp`, `ProtectHome`, and `ProtectSystem=full` |
 | Controlled test | Apache failure detected; evidence preserved; EXIT trap restored Apache and timer |
 | Reboot verification | Timer remained enabled and active; automatic health run completed |
-| Recovery coverage | Service and timer included in the verified 15-source configuration backup |
+| Recovery coverage | Service and timer included in the verified 17-source configuration backup |
 
 ## Health-event processing standard
 
@@ -145,7 +145,29 @@ The event handler and processor add no listening service or network port.
 | Event retention | Daily rotation, up to 180 rotations, maximum age 180 days |
 | Raw evidence retention | Files under `/var/log/leanops-incidents` cleaned after 180 days |
 
-Parsing, counting, integrated collection, duplicate suppression, recovery, permissions, live service execution, 15-source backup restoration, and retention passed.
+Parsing, counting, integrated collection, duplicate suppression, recovery, permissions, live service execution, 17-source backup restoration, and retention passed.
+
+## Controlled notification standard
+
+The notifier adds no listening service or inbound port. It submits outbound mail through an authenticated TLS SMTP relay only when the processor queues an alert or recovery transition.
+
+| Control | Verified state |
+|---|---|
+| Notifier | `/usr/local/sbin/leanops-health-notifier`, `700 root:root` |
+| SMTP configuration | `/etc/leanops-health-notify.conf`, `600 root:root`, excluded from Git and backups |
+| Transport | Authenticated TLS submission through `msmtp` |
+| Grouping | One message per cycle containing each distinct queued condition |
+| Warning alert | Queued on consecutive occurrence 4 |
+| Failure alert | Queued immediately on occurrence 1 |
+| Recovery alert | Queued once when an active condition returns to normal |
+| Duplicate control | No repeated alert while the same condition remains active |
+| Delivery failure | Pending state retained for a later retry; pipeline error remains visible |
+| Notification state | `/var/lib/leanops-health-monitor/notification-state.json`, `600 root:root` |
+| Delivery history | `/var/log/leanops-health-events/notification-events.tsv`, `600 root:root` |
+| Retention | Notification events rotate daily and expire after 180 days |
+| Recovery coverage | Notifier and local AppArmor policy included in the verified 17-source backup; SMTP secret excluded |
+
+Six transition tests and live SMTP delivery verified threshold alerts, immediate failures, grouped distinct conditions, duplicate suppression, recovery messages, and retry behavior.
 
 ## Incident-evidence collection standard
 
