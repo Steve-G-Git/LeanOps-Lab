@@ -6,7 +6,7 @@ Cycle 12 extends the local health-monitoring pipeline with controlled SMTP notif
 
 Warnings are tallied without email for the first three consecutive observations. Observation four queues one alert and evidence. Failures queue an alert and evidence immediately. Continued conditions are recorded without duplicate messages, while recovery generates one notification. Different conditions from the same run are grouped into one email but remain visibly separate.
 
-The state-transition tests, live delivery, duplicate suppression, retry retention, recovery handling, protected file permissions, service integration, timer operation, and 180-day log retention passed. Final backup expansion, isolated restoration, recovery checkpoint, and branch audit remain open before Cycle 12 is closed.
+The state-transition tests, live delivery, duplicate suppression, retry retention, recovery handling, protected file permissions, service integration, timer operation, 180-day log retention, backup expansion, SHA-256 verification, isolated restoration, and final recovery checkpoint passed. Cycle 12 is verified and closed on its feature branch pending normal review before merge.
 
 ## Plan
 
@@ -114,6 +114,12 @@ See [`../../evidence/sanitized/pdca-12-email-notifications.txt`](../../evidence/
 | Notification state and event permissions | Passed; `0600 root:root` |
 | Service result and timer operation | Passed |
 | Combined event-log retention policy | Passed |
+| Protected backup scope | Passed; expanded from 15 to 17 non-secret sources |
+| Fresh backup SHA-256 verification | Passed |
+| Isolated restore | Passed; 17 of 17 sources restored |
+| Restored content and metadata | Passed; zero mismatches |
+| SMTP credential configuration excluded | Passed; absent from backup and public evidence |
+| Final recovery checkpoint | Passed; snapshot `23-PDCA12-EmailNotificationsVerified` created |
 | Failed units after correction | Zero |
 
 ### Corrections found during Check
@@ -138,13 +144,16 @@ See [`../../evidence/sanitized/pdca-12-email-notifications.txt`](../../evidence/
 - Retain operational health and notification history for 180 days.
 - Treat processor, notifier, SMTP, or retention failures as visible problems.
 
-### Remaining closure work
+### Closure result
 
-- Add the notifier and other non-secret Cycle 12 components to protected backup coverage without adding the SMTP credential file.
-- Create a fresh integrity-checked backup and restore it in isolation.
-- Preserve the final Cycle 12 snapshot.
-- Audit public changes for credentials and unnecessary identifiers.
-- Review the feature branch before merging to `main`.
+- Protected backup coverage expanded from 15 to 17 sources by adding the notifier and AppArmor local rule.
+- The SMTP credential configuration remained excluded from the backup archive.
+- A fresh backup passed SHA-256 verification.
+- All 17 approved sources restored in isolation with zero missing files, content mismatches, or metadata mismatches.
+- Final service, timer, state-file, retention, and failed-unit checks passed.
+- Snapshot `23-PDCA12-EmailNotificationsVerified` preserves the verified recovery point.
+- Public documentation was audited for credentials and unnecessary identifiers.
+- Cycle 12 is closed on `pdca-12-email-notifications` and remains unmerged until normal branch review.
 
 ### Standard work and recovery
 
