@@ -6,9 +6,9 @@ The lab begins with a small, poorly documented environment. Each cycle identifie
 
 ## Current status
 
-**Active development: 11 PDCA cycles completed**
+**Active development: 12 PDCA cycles completed**
 
-The current system uses a hardened 15-minute systemd timer, a root-controlled health check, durable condition state, warning and failure thresholds, automatic evidence collection, recovery records, a protected 15-source configuration backup, and 180-day operational-record retention. Cycle 11 reorganized the project so the architecture, control logic, verification history, and standard work can be understood quickly without changing the verified server state.
+The current system uses a hardened 15-minute systemd timer, a root-controlled health check, durable condition state, warning and failure thresholds, automatic evidence collection, grouped SMTP notifications, duplicate suppression, recovery and retry records, a protected 17-source configuration backup, and 180-day operational-record retention. Cycle 12 made alert-worthy transitions visible while preserving local evidence and keeping SMTP credentials outside Git and backups.
 
 ## Start here
 
@@ -90,6 +90,7 @@ See [Architecture and control flow](docs/architecture.md) for component responsi
 | 09 | Health checks depended on manual execution | Added a hardened oneshot service and persistent 15-minute timer | Automated execution, journal records, rollback, recovery, and reboot persistence passed |
 | 10 | Repeated abnormal results lacked durable state and bounded retention | Added condition counts, recovery records, evidence thresholds, and 180-day retention | Threshold collection, duplicate suppression, protected records, 15-source restoration, and retention passed |
 | 11 | The mature lab was difficult to understand quickly | Added architecture documentation, visual control flow, role-based navigation, and a recruiter-facing project summary | Links, Mermaid syntax, terminology, cycle counts, current-state claims, and identifier sanitization were audited |
+| 12 | Abnormal conditions were preserved locally but not actively communicated | Added grouped authenticated SMTP notifications with thresholds, retries, recovery messages, and duplicate suppression | Live delivery, six transition tests, protected state, 180-day retention, 17-source backup, isolated restoration, and final snapshot passed |
 
 ## Repository map
 
@@ -99,7 +100,7 @@ See [Architecture and control flow](docs/architecture.md) for component responsi
 | [Project scope](docs/scope.md) | Fictional scenario, boundaries, safety rules, and accuracy statement |
 | [Asset inventory](docs/asset-inventory.md) | Hardware, operating system, storage, and network inventory |
 | [Service inventory](docs/service-inventory.md) | Required services and externally observed exposure |
-| [PDCA records](docs/pdca/) | Eleven Plan, Do, Check, Act records with risks, tests, evidence, and adopted standards |
+| [PDCA records](docs/pdca/) | Twelve Plan, Do, Check, Act records with risks, tests, evidence, and adopted standards |
 | [Runbooks](docs/runbooks/) | Repeatable configuration, verification, monitoring, evidence, response, backup, and recovery procedures |
 | [Change and snapshot log](docs/change-log.md) | Chronological changes, verification, rollback, and recovery checkpoints |
 | [Security considerations](docs/security-considerations.md) | Isolation, access control, sanitization, remaining risks, and data protection |
@@ -124,4 +125,4 @@ Windows 11, Oracle VirtualBox, Ubuntu Server, OpenSSH, Apache, UFW, Nmap, PowerS
 
 ## Next improvement
 
-Cycle 12 can add a controlled notification path to the completed local monitoring pipeline. It should define which conditions warrant notification, who receives them, how repeated notifications are suppressed, how delivery failure remains visible, and how the entire path is tested and rolled back. Snapshot `21-PDCA10-HealthEventProcessingComplete` remains the current server recovery point because Cycle 11 changed documentation only.
+Cycle 12 is verified and closed on its feature branch. The next improvement should be selected only after branch review and promotion of the controlled notification standard. Snapshot `23-PDCA12-EmailNotificationsVerified` is the current verified server recovery point.

@@ -37,6 +37,9 @@
 
 | 2026-08-17 | Added current-state architecture, visual control flow, role-based repository navigation, and Cycle 11 presentation documentation | Make the mature lab understandable quickly without changing the verified server state | Internal links, Mermaid blocks, cycle counts, current-state quantities, roadmap language, and public identifiers were audited | Revert the Cycle 11 repository changes; snapshot `21-PDCA10-HealthEventProcessingComplete` remains the server recovery point |
 
+| 2026-08-20 | Added controlled grouped SMTP notifications, retry state, recovery messages, duplicate suppression, and notification-log retention | Make alert-worthy health transitions visible without emailing every repeated warning | Six logic tests, live delivery, duplicate suppression, protected records, service and timer checks, and corrected 180-day logrotate validation passed | Restore `/root/leanops-cycle12-rollback` and reload systemd, or restore `22-PDCA12-PreEmailNotifications` |
+| 2026-08-22 | Closed Cycle 12 after backup expansion and isolated recovery verification | Prove the notification standard is recoverable without archiving SMTP credentials | Backup coverage expanded from 15 to 17 non-secret sources; SHA-256 passed; all 17 sources restored with zero content or metadata mismatches; service, timer, state, retention, and failed-unit checks passed | Restore `23-PDCA12-EmailNotificationsVerified` or use the retained file-level rollback copies |
+
 ## Snapshot checkpoints
 
 | Snapshot | Verified condition |
@@ -63,5 +66,7 @@
 | `19-PDCA09-ScheduledMonitoringComplete` | Scheduled health service and persistent timer, controlled failure handling, eleven-source recovery, off-VM evidence, automatic post-reboot execution, and final clean state verified |
 | `Health Monitor Retention Verified - 2026-08-17` | Health-event handler and processor, protected condition state and event records, scheduled execution, and 180-day retention policies verified; final automatic collector-trigger test remains open |
 | `21-PDCA10-HealthEventProcessingComplete` | Integrated warning evidence, duplicate suppression, recovery recording, 15-source backup and isolated restoration, service success, active timer, zero failed units, and clean shutdown verified |
+| `22-PDCA12-PreEmailNotifications` | Completed Cycle 10 state preserved before installing external email notification components |
+| `23-PDCA12-EmailNotificationsVerified` | Controlled email delivery, grouped conditions, duplicate suppression, recovery and retry behavior, protected records, 180-day retention, 17-source backup, isolated restore, active timer, and zero failed units verified |
 
-Cycle 11 changed repository documentation only. No new VM snapshot was required; `21-PDCA10-HealthEventProcessingComplete` remains the current server recovery point.
+Cycle 11 changed repository documentation only. Snapshot `23-PDCA12-EmailNotificationsVerified` is the current verified server recovery point after Cycle 12.

@@ -1,0 +1,86 @@
+PDCA 12 SANITIZED VALIDATION
+===============================
+
+STATIC VALIDATION
+handler syntax: passed
+processor syntax: passed
+notifier syntax: passed
+test syntax: passed
+systemd unit verification: passed
+
+ISOLATED NOTIFICATION LOGIC
+warning threshold and suppression: passed
+immediate failure and grouped distinct conditions: passed
+existing over-threshold warning queued once: passed
+recovery after sent alert: passed
+unsent alert and recovery coalescing: passed
+SMTP failure retained and later success cleared pending state: passed
+tests passed: 6 of 6
+
+LIVE DELIVERY
+authenticated SMTP submission: passed
+message received: yes
+condition identifier: package_updates
+severity: warning
+evidence status included: yes
+evidence attachments: none
+
+DUPLICATE SUPPRESSION
+service execution: passed
+notification lines before repeated condition: 3
+notification lines after repeated condition: 3
+pending notifications after delivery: 0
+
+PROTECTION
+SMTP configuration: 0600 root:root
+notification state: 0600 root:root
+notification event history: 0600 root:root
+credentials published: no
+credentials included in evidence: no
+credentials included in protected backup scope: no
+
+SCHEDULED OPERATION
+health-monitor service result: success
+timer: enabled and active
+failed units after correction: 0
+
+RETENTION
+health-event log: included
+notification-event log: included
+rotation frequency: daily
+rotations retained: 180
+maximum age: 180 days
+compression: enabled
+new files: 0600 root:root
+debug validation: passed
+logrotate service: success
+
+CORRECTIONS
+cross-platform CRLF detected by syntax checks: corrected and retested
+invalid multi-path rotation declaration: corrected and retested
+
+BACKUP AND RESTORE
+protected backup sources: 17
+duplicate allowlist entries: 0
+notifier included: yes
+AppArmor local rule included: yes
+SMTP credential configuration included: no
+fresh backup SHA-256: passed
+isolated archive extraction: passed
+expected sources: 17
+restored sources: 17
+missing files: 0
+content mismatches: 0
+metadata mismatches: 0
+secret configuration restored: no
+
+FINAL ACCEPTANCE
+service start: passed
+timer enabled: yes
+timer active: yes
+condition state JSON: valid
+notification state JSON: valid
+logrotate validation: passed
+failed units: 0
+final recovery snapshot: 23-PDCA12-EmailNotificationsVerified
+cycle status: verified and closed on feature branch

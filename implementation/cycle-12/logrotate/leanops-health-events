@@ -1,0 +1,12 @@
+/var/log/leanops-health-events/health-events.tsv /var/log/leanops-health-events/notification-events.tsv {
+    daily
+    rotate 180
+    maxage 180
+    missingok
+    notifempty
+    dateext
+    dateformat -%Y%m%d
+    compress
+    delaycompress
+    create 0600 root root
+}
