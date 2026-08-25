@@ -201,4 +201,4 @@ See [`../../evidence/sanitized/pdca-13-file-service-validation.txt`](../../evide
 - [Manage the role-based file service](../runbooks/manage-role-based-file-service.md)
 - [Manage share-data backups](../runbooks/manage-share-data-backups.md)
 
-Cycle 13 is technically verified, documented on `pdca-13-file-service`, and ready for branch review.
+Cycle 13 was merged into `main` through normal branch review and is closed.

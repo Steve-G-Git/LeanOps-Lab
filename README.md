@@ -127,4 +127,4 @@ Windows 11, Oracle VirtualBox, Ubuntu Server, OpenSSH, Samba, Apache, UFW, Nmap,
 
 ## Next improvement
 
-Cycle 13 is verified and documented on `pdca-13-file-service`. Snapshot `26-PDCA13-FileServiceRecoveryVerified` is the current verified server recovery point. Promotion to `main` remains pending normal branch review.
+Cycle 13 is verified, merged into `main`, and closed. Snapshot `26-PDCA13-FileServiceRecoveryVerified` is the current verified server recovery point. The next PDCA cycle should begin only after selecting a new observed problem with measurable success criteria, validation, and rollback.
