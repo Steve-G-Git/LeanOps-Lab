@@ -4,8 +4,8 @@ This directory contains the sanitized implementation for controlled
 LeanOps-Lab health notifications. Server-side acceptance, expanded backup
 coverage, isolated restoration, and the final recovery checkpoint passed.
 
-The verified code remains isolated on the `pdca-12-email-notifications` branch
-for normal review before merge. It contains no email address, SMTP login, SMTP
+The verified code was reviewed and merged into `main` from the
+`pdca-12-email-notifications` branch. It contains no email address, SMTP login, SMTP
 key, IP address, or live notification configuration.
 
 ## Layout
@@ -42,8 +42,6 @@ retention, protected notification records, service integration, timer
 operation, corrected 180-day log rotation, 17-source backup coverage,
 SHA-256 verification, and a 17-of-17 isolated restore passed.
 
-## Promotion boundary
+## Promotion status
 
-Cycle 12 is verified and closed on this feature branch. Merge into `main` only
-after normal branch review confirms the documented behavior, sanitized public
-evidence, and intended repository scope.
+Cycle 12 passed branch review, was merged into `main`, and is closed.

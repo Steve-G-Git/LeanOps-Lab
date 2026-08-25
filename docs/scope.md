@@ -26,6 +26,9 @@ The initial milestone intentionally excluded dashboards, automation, virtual rou
 - Health-event processing, condition state, recovery records, and evidence thresholds
 - Grouped authenticated SMTP notifications for alert and recovery transitions
 - Notification duplicate suppression, protected delivery state, and retry after delivery failure
+- Host-only authenticated Samba file sharing
+- Company, department, and per-user share authorization
+- Protected scheduled share-data backup, retention, and isolated restoration
 - Bounded health, notification, and raw-evidence retention
 - Controlled failure testing and incident response
 - Rollback planning and VirtualBox snapshots
@@ -38,10 +41,11 @@ The initial milestone intentionally excluded dashboards, automation, virtual rou
 - Scanning devices outside the owned lab
 - Exploitation or intentionally vulnerable public services
 - Production credentials or personal data
+- Production file sharing, centralized identity, or real business data
 - A production monitoring or alerting platform
 - Claims that lab work represents professional IT employment
 
-Future dashboards, additional network segments, centralized logging, or production-scale alerting require a separate PDCA cycle with a defined problem, success criteria, risk controls, and rollback plan.
+Future dashboards, additional network segments, centralized logging, centralized identity, off-site replication, or production-scale services require a separate PDCA cycle with a defined problem, success criteria, risk controls, and rollback plan.
 
 ## Safety boundaries
 

@@ -2,9 +2,9 @@
 
 ## Purpose
 
-This document provides the current-state view of LeanOps-Lab after Cycle 12. It explains how the isolated network, security controls, scheduled monitoring, event processing, evidence collection, controlled notification, retention, backup, and recovery controls fit together.
+This document provides the current-state view of LeanOps-Lab after Cycle 13. It explains how the isolated network, security controls, scheduled monitoring, event processing, evidence collection, controlled notification, retention, backup, and recovery controls fit together.
 
-The architecture reflects the verified operational standard through Cycle 12. Notification delivery extends beyond the VM through an authenticated TLS SMTP relay, while condition state, evidence, retry state, and notification records remain protected locally.
+The architecture reflects the verified operational standard through Cycle 13. Notification delivery extends through an authenticated TLS SMTP relay. Samba is limited to the isolated host-only network, and both selected configuration and share data have separate protected recovery paths.
 
 ## Network boundary
 
@@ -26,6 +26,23 @@ flowchart LR
 | Host-only adapter | Supplies the approved administration path | Isolated from the physical home network |
 | UFW | Enforces default-deny inbound policy | SSH is restricted to the approved administration source |
 | OpenSSH | Provides remote administration | Public-key authentication only; passwords disabled |
+| Samba | Provides role-based company, department, and private shares | Binds to loopback and `enp0s8`; UFW restricts TCP 445 to the approved Windows host |
+
+## File-service and backup flow
+
+```mermaid
+flowchart TD
+    Windows["Windows host"] --> Boundary["Host-only network and UFW"]
+    Boundary --> Samba["Authenticated Samba service"]
+    Samba --> Shares["Company, department, and private shares"]
+    Shares --> Backup["Locked daily backup"]
+    Backup --> Recovery["Protected archive, manifest, and SHA-256"]
+```
+
+- Company access is controlled by `leanops-users`.
+- Operations and management access are controlled by their department groups.
+- Private access resolves to `/srv/leanops-shares/users/%U`.
+- The backup pauses Samba and the health-monitor timer, preserves their prior states, and retains the newest 30 sets.
 
 ## Monitoring and evidence flow
 
@@ -59,6 +76,10 @@ flowchart TD
 | `leanops-health-event-processor` | Validates results, assigns stable condition IDs, updates state, records events, and decides whether evidence is due | Unknown or inconsistent input returns code `3` |
 | `leanops-incident-collect` | Collects a bounded, sanitized diagnostic package | Manifest records command exit codes; package receives a checksum |
 | `leanops-health-notifier` | Groups alert-worthy transitions, sends one SMTP message, records delivery, and retains failed sends for retry | Delivery failure remains pending and returns a visible pipeline error |
+| `smbd` | Serves authenticated company, department, and private shares | Required service state, binding, UFW scope, and access tests make drift visible |
+| `leanops-share-backup.timer` | Schedules one persistent daily share-data backup | Inactive or disabled timer is visible through systemd checks |
+| `leanops-share-backup.service` | Runs the locked backup as root | Nonzero script exit remains a failed oneshot result |
+| `leanops-share-backup` | Pauses writers, records metadata and hashes, creates and verifies the archive, restores prior service states, and enforces 30-set retention | Lock, source, archive, checksum, or cleanup failures return a visible error |
 
 ## Condition lifecycle
 
@@ -90,12 +111,16 @@ stateDiagram-v2
 | Incident packages | Root-controlled incident directory | Directory `0700`; artifacts `0600`; SHA-256 sidecar | Maximum 180 days |
 | Notification state and event history | Root-controlled state and log directories | Files `0600`; atomic state replacement; no credential values recorded | Daily log rotation; maximum 180 days |
 | SMTP client configuration | Root-controlled configuration file | Mode `0600`; excluded from Git and configuration backups | Active secret-bearing configuration |
-| Configuration backups | Root-controlled backup directory | Allowlisted sources; archives, manifests, and checksums `0600` | Retained as controlled recovery artifacts |
+| Configuration backups | Root-controlled backup directory | 21 allowlisted non-secret sources; archives, manifests, and checksums `0600` | Retained as controlled recovery artifacts |
+| Active share data | Root-controlled share hierarchy | Group authorization, setgid collaborative directories, and `0700` private directories | Active fictional business data |
+| Share-data backups | Root-controlled backup directory | Directory `0700`; archives, manifests, and checksums `0600` | Newest 30 backup sets |
 | PDCA records and runbooks | Git repository | Sanitized, reviewed, and versioned | Permanent project knowledge |
 
 ## Backup and recovery boundary
 
-The configuration backup protects seventeen approved non-secret sources, including network, SSH, firewall, health-check, evidence, handler, processor, notifier, service, timer, retention-policy, and local AppArmor policy files. The secret-bearing SMTP configuration is intentionally excluded. This is not a full-system backup.
+The configuration backup protects 21 approved non-secret sources, including network, SSH, firewall, monitoring, evidence, notification, Samba, and share-backup automation. The secret-bearing SMTP configuration remains excluded.
+
+A separate share-data backup protects `/srv/leanops-shares`, including ACLs, extended attributes, numeric ownership, filesystem metadata, and per-file hashes. It retains 30 sets and is manually copied to the Windows host after selected closure tests. Raw share-data artifacts are excluded from Git. Neither package is a full-system backup.
 
 Recovery is layered:
 
@@ -119,8 +144,10 @@ Recovery is layered:
 ## Current limitations
 
 - SMTP notifications depend on an external relay and outbound internet access; local event and retry records preserve visibility when delivery fails.
-- The Windows backup is off-VM but is not yet a separate encrypted or versioned off-site copy.
+- The Windows copies are off-VM but are not encrypted, automatically replicated, or versioned off-site.
 - The incident collector is bounded and sanitized for observed risks, not a universal data-loss-prevention system.
-- The lab contains one managed server and one administrative workstation, not a production monitoring fleet.
+- Samba identities are local fictional accounts rather than centralized directory identities.
+- The share backup briefly pauses Samba and health-monitor scheduling to establish a consistent archive boundary.
+- The lab contains one managed server and one administrative workstation, not a production monitoring or file-service fleet.
 
 These limitations define logical future PDCA work. Any next cycle should address a newly observed problem rather than extend the system without evidence of need.

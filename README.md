@@ -6,9 +6,9 @@ The lab begins with a small, poorly documented environment. Each cycle identifie
 
 ## Current status
 
-**Active development: 12 PDCA cycles completed**
+**Active development: 13 PDCA cycles completed**
 
-The current system uses a hardened 15-minute systemd timer, a root-controlled health check, durable condition state, warning and failure thresholds, automatic evidence collection, grouped SMTP notifications, duplicate suppression, recovery and retry records, a protected 17-source configuration backup, and 180-day operational-record retention. Cycle 12 made alert-worthy transitions visible while preserving local evidence and keeping SMTP credentials outside Git and backups.
+The current system uses a hardened 15-minute health-monitor timer, durable condition and notification state, threshold-based evidence collection, grouped SMTP notifications, a host-only role-based Samba service, a protected 21-source configuration backup, daily share-data backups with 30-set retention, and 180-day operational-record retention. Cycle 13 added controlled business file sharing and recoverable share data without exposing SMB beyond the isolated lab network.
 
 ## Start here
 
@@ -49,6 +49,7 @@ flowchart LR
 - NAT provides controlled outbound updates without public exposure or port forwarding.
 - The host-only network carries administration, validation, and approved scanning.
 - The Windows host provides an independent test point and off-VM backup copy.
+- Samba listens only on the host-only path; UFW permits TCP 445 only from the approved Windows host.
 
 ### Health-monitor workflow
 
@@ -91,6 +92,7 @@ See [Architecture and control flow](docs/architecture.md) for component responsi
 | 10 | Repeated abnormal results lacked durable state and bounded retention | Added condition counts, recovery records, evidence thresholds, and 180-day retention | Threshold collection, duplicate suppression, protected records, 15-source restoration, and retention passed |
 | 11 | The mature lab was difficult to understand quickly | Added architecture documentation, visual control flow, role-based navigation, and a recruiter-facing project summary | Links, Mermaid syntax, terminology, cycle counts, current-state claims, and identifier sanitization were audited |
 | 12 | Abnormal conditions were preserved locally but not actively communicated | Added grouped authenticated SMTP notifications with thresholds, retries, recovery messages, and duplicate suppression | Live delivery, six transition tests, protected state, 180-day retention, 17-source backup, isolated restoration, and final snapshot passed |
+| 13 | The lab lacked controlled business file sharing and share-data recovery | Added host-only role-based Samba shares, group and private access controls, and a persistent daily backup | Allowed and denied access, health integration, 30-set retention, isolated restoration, 21-source configuration recovery, two Windows checksum tests, and final snapshot passed |
 
 ## Repository map
 
@@ -100,7 +102,7 @@ See [Architecture and control flow](docs/architecture.md) for component responsi
 | [Project scope](docs/scope.md) | Fictional scenario, boundaries, safety rules, and accuracy statement |
 | [Asset inventory](docs/asset-inventory.md) | Hardware, operating system, storage, and network inventory |
 | [Service inventory](docs/service-inventory.md) | Required services and externally observed exposure |
-| [PDCA records](docs/pdca/) | Twelve Plan, Do, Check, Act records with risks, tests, evidence, and adopted standards |
+| [PDCA records](docs/pdca/) | Thirteen Plan, Do, Check, Act records with risks, tests, evidence, and adopted standards |
 | [Runbooks](docs/runbooks/) | Repeatable configuration, verification, monitoring, evidence, response, backup, and recovery procedures |
 | [Change and snapshot log](docs/change-log.md) | Chronological changes, verification, rollback, and recovery checkpoints |
 | [Security considerations](docs/security-considerations.md) | Isolation, access control, sanitization, remaining risks, and data protection |
@@ -108,21 +110,21 @@ See [Architecture and control flow](docs/architecture.md) for component responsi
 
 ## Skills demonstrated
 
-- **Networking:** IPv4 addressing, routing, DNS, NAT, host-only networking, Nmap, and independent endpoint validation
+- **Networking:** IPv4 addressing, routing, DNS, NAT, host-only networking, Samba/SMB, Nmap, and independent endpoint validation
 - **Linux administration:** OpenSSH, systemd, UFW, journal review, file permissions, services, and timers
 - **Automation:** Bash validation and orchestration, Python state processing, exit-code contracts, locking, and atomic writes
-- **Security and recovery:** Key-only SSH, source-restricted firewall rules, evidence sanitization, SHA-256 integrity, protected backups, and isolated restoration
+- **Security and recovery:** Key-only SSH, source-restricted firewall rules, role-based share access, evidence sanitization, SHA-256 integrity, protected backups, and isolated restoration
 - **Operations:** Health checks, abnormal-condition tracking, thresholds, incident evidence, retention, controlled failure testing, and staged recovery
 - **Continuous improvement:** PDCA, standardized work, rollback planning, before-and-after verification, and concise technical documentation
 
 ## Evidence policy
 
-Public evidence is sanitized before publication. Passwords, private keys, tokens, authentication material, personal usernames, real home-network details, fingerprints, machine identifiers, and unnecessary MAC or IP addresses are excluded. Raw operational records remain protected inside the lab and expire under the documented 180-day policy.
+Public evidence is sanitized before publication. Passwords, private keys, tokens, authentication material, personal usernames, real home-network details, fingerprints, machine identifiers, and unnecessary MAC or IP addresses are excluded. Raw operational records remain protected inside the lab and expire under the documented 180-day policy. Raw share data, backup archives, manifests, file inventories, and checksum values are not committed.
 
 ## Tools used
 
-Windows 11, Oracle VirtualBox, Ubuntu Server, OpenSSH, Apache, UFW, Nmap, PowerShell, Bash, Python, systemd, Git, and GitHub.
+Windows 11, Oracle VirtualBox, Ubuntu Server, OpenSSH, Samba, Apache, UFW, Nmap, PowerShell, Bash, Python, systemd, Git, and GitHub.
 
 ## Next improvement
 
-Cycle 12 is verified, merged into `main`, and closed. Snapshot `23-PDCA12-EmailNotificationsVerified` is the current verified server recovery point. The next PDCA cycle should begin only after selecting a new observed problem with measurable success criteria, validation, and rollback.
+Cycle 13 is verified and documented on `pdca-13-file-service`. Snapshot `26-PDCA13-FileServiceRecoveryVerified` is the current verified server recovery point. Promotion to `main` remains pending normal branch review.

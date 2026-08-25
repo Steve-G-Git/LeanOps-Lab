@@ -153,7 +153,7 @@ See [`../../evidence/sanitized/pdca-12-email-notifications.txt`](../../evidence/
 - Final service, timer, state-file, retention, and failed-unit checks passed.
 - Snapshot `23-PDCA12-EmailNotificationsVerified` preserves the verified recovery point.
 - Public documentation was audited for credentials and unnecessary identifiers.
-- Cycle 12 is closed on `pdca-12-email-notifications` and remains unmerged until normal branch review.
+- Cycle 12 was merged into `main` through normal branch review and is closed.
 
 ### Standard work and recovery
 

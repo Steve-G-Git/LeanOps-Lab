@@ -1,0 +1,12 @@
+[Unit]
+Description=Daily LeanOps share-data backup
+
+[Timer]
+OnCalendar=*-*-* 02:30:00
+Persistent=true
+RandomizedDelaySec=5m
+AccuracySec=1m
+Unit=leanops-share-backup.service
+
+[Install]
+WantedBy=timers.target

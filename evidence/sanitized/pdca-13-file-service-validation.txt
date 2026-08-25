@@ -1,0 +1,104 @@
+PDCA 13 SANITIZED VALIDATION SUMMARY
+=====================================
+
+Scope
+-----
+Role-based Samba file service, isolated-network exposure, share permissions,
+health-monitor integration, scheduled share-data backup, isolated restoration,
+off-VM checksum verification, and configuration recovery.
+
+Lab identities
+--------------
+Alex, Jordan, and Morgan are fictional users created only for this lab.
+
+Network and service boundary
+----------------------------
+Samba effective configuration: VALID
+Server role: standalone
+Minimum protocol: SMB2
+Transport: TCP 445
+Bound interfaces: loopback and host-only interface
+NetBIOS: disabled
+Printing and spooler: disabled
+Guest access: not configured
+Host allowlist: loopback and isolated host-only subnet
+UFW TCP 445 scope: host-only interface from approved Windows host only
+smbd enabled: PASS
+smbd active: PASS
+
+Role-based access
+-----------------
+Company share: approved fictional users
+Operations share: operations group
+Management share: management group
+Private share: authenticated user only
+Access-based share enumeration: enabled
+Authorized access: PASS
+Unauthorized department access: DENIED AS EXPECTED
+Cross-user private access: DENIED AS EXPECTED
+Windows-created files in approved shares: PASS
+
+Filesystem model
+----------------
+Share root: 0711 root:root
+Users root: 0711 root:root
+Company share: 2770 root:leanops-users
+Operations share: 2770 root:operations
+Management share: 2770 root:management
+Private user directories: 0700 matching fictional user
+Collaborative file creation mode: 0660
+Private file creation mode: 0600
+
+Share-data backup
+-----------------
+Source: protected share-data tree
+Destination: 0700 root:root
+Script: 0700 root:root
+Service and timer: 0644 root:root
+Artifacts: 0600 root:root
+Schedule: daily 02:30, persistent, randomized delay up to 5 minutes
+Concurrent-run control: non-blocking file lock
+Consistency boundary: Samba and health-monitor timer paused when active
+Failure cleanup: prior service states restored through EXIT trap
+Archive properties: ACLs, extended attributes, and numeric ownership preserved
+Manifest properties: filesystem metadata and per-file hashes recorded privately
+Archive validation: listing passed
+Retention: newest 30 backup sets
+Latest scheduled service result: success
+Latest scheduled service exit status: 0
+Timer enabled: PASS
+Timer active: PASS
+Isolated share-data restoration: PASS
+Windows transfer checksum: PASS
+
+Selected-configuration recovery
+-------------------------------
+Initial Cycle 13 source count: 18
+Gap found during documentation audit:
+- share-backup script not protected
+- share-backup service not protected
+- share-backup timer not protected
+
+Corrected source count: 21
+Fresh configuration archive checksum: PASS
+Exact archive scope: 21 entries
+Isolated restore total: 21
+Missing restored files: 0
+Content mismatches: 0
+Metadata mismatches: 0
+Windows transfer checksum: PASS
+
+Final state
+-----------
+Samba active and enabled: PASS
+Health-monitor timer active and enabled: PASS
+Share-backup timer active and enabled: PASS
+Failed systemd units: 0
+Pre-change snapshot: 24-PDCA13-PreFileService
+Initial verified snapshot: 25-PDCA13-FileServiceVerified
+Final recovery snapshot: 26-PDCA13-FileServiceRecoveryVerified
+
+Publication boundary
+--------------------
+Raw share contents, raw manifests, archive files, checksum values, Samba
+password material, and private export packages are excluded from Git.

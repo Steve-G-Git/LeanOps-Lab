@@ -1,0 +1,129 @@
+#!/usr/bin/env bash
+
+set -Eeuo pipefail
+umask 077
+
+source_dir="/srv/leanops-shares"
+backup_dir="/var/backups/leanops-shares"
+lock_file="/run/leanops-share-backup.lock"
+retained_backups=30
+timestamp="$(date -u +%Y%m%dT%H%M%SZ)"
+base_name="leanops-shares-$timestamp"
+archive="$backup_dir/$base_name.tar.gz"
+manifest="$backup_dir/$base_name.manifest.txt"
+checksum="$archive.sha256"
+temporary_archive="$archive.tmp"
+temporary_manifest="$manifest.tmp"
+smb_was_active=no
+timer_was_active=no
+
+cleanup() {
+    backup_rc=$?
+
+    rm -f -- "$temporary_archive" "$temporary_manifest"
+
+    if [ "$smb_was_active" = yes ]; then
+        systemctl start smbd.service || true
+    fi
+
+    if [ "$timer_was_active" = yes ]; then
+        systemctl start leanops-health-monitor.timer || true
+    fi
+
+    exit "$backup_rc"
+}
+trap cleanup EXIT
+
+exec 9>"$lock_file"
+
+if ! flock -n 9; then
+    echo "SHARE BACKUP ERROR: Another backup is already running" >&2
+    exit 3
+fi
+
+if [ ! -d "$source_dir" ]; then
+    echo "SHARE BACKUP ERROR: Source directory is missing" >&2
+    exit 3
+fi
+
+install -d -m 700 -o root -g root "$backup_dir"
+
+if systemctl is-active --quiet leanops-health-monitor.timer; then
+    timer_was_active=yes
+    systemctl stop leanops-health-monitor.timer
+fi
+
+if systemctl is-active --quiet smbd.service; then
+    smb_was_active=yes
+    systemctl stop smbd.service
+fi
+
+{
+    echo "LeanOps-Lab share-data backup manifest"
+    echo "Created UTC: $timestamp"
+    echo "Source: $source_dir"
+    echo
+    echo "===== FILESYSTEM METADATA ====="
+
+    find "$source_dir" \
+        -printf '%y %m %U:%G %s %p\n' |
+        sort
+
+    echo
+    echo "===== FILE SHA-256 HASHES ====="
+
+    find "$source_dir" \
+        -type f \
+        -print0 |
+        sort -z |
+        xargs -0 -r sha256sum
+} > "$temporary_manifest"
+
+tar \
+    --acls \
+    --xattrs \
+    --xattrs-include='*' \
+    --numeric-owner \
+    -czf "$temporary_archive" \
+    -C / \
+    srv/leanops-shares
+
+tar -tzf "$temporary_archive" >/dev/null
+
+mv -- "$temporary_manifest" "$manifest"
+mv -- "$temporary_archive" "$archive"
+
+chmod 600 "$manifest" "$archive"
+
+(
+    cd "$backup_dir"
+    sha256sum "$(basename "$archive")" > "$(basename "$checksum")"
+)
+
+chmod 600 "$checksum"
+
+mapfile -t expired_archives < <(
+    find "$backup_dir" \
+        -maxdepth 1 \
+        -type f \
+        -name 'leanops-shares-*.tar.gz' \
+        -printf '%T@ %p\n' |
+    sort -nr |
+    tail -n "+$((retained_backups + 1))" |
+    cut -d' ' -f2-
+)
+
+for expired_archive in "${expired_archives[@]}"; do
+    expired_base="${expired_archive%.tar.gz}"
+
+    rm -f -- \
+        "$expired_archive" \
+        "$expired_archive.sha256" \
+        "$expired_base.manifest.txt"
+done
+
+printf '%s\n' \
+    "Share-data backup created:" \
+    "$archive" \
+    "$manifest" \
+    "$checksum"

@@ -71,21 +71,63 @@ Authentication hardening changed how SSH validates users but did not add another
 
 Before UFW was enabled, the 999 non-listening commonly scanned TCP ports were reported as closed with resets. With UFW active, the same ports were reported as filtered with no response. The approved SSH path remained available.
 
+## Role-based file-service standard
+
+Samba adds one inbound service on the isolated host-only network. It is not exposed through NAT or router port forwarding.
+
+| Control | Verified state |
+|---|---|
+| Service | `smbd`, enabled and active |
+| Port | TCP 445 only |
+| Binding | Loopback and `enp0s8` |
+| Firewall | TCP 445 on `enp0s8` from the approved Windows host only |
+| Protocol | SMB2 minimum |
+| Unneeded functions | NetBIOS, printing, spooler, DNS proxy, and guest access disabled |
+| Company access | `@leanops-users` |
+| Operations access | `@operations` |
+| Management access | `@management` |
+| Private access | Authenticated `%U` only |
+| Collaborative modes | `0660` files and `02770` directories |
+| Private modes | `0600` files and `0700` directories |
+| Unauthorized tests | Department and cross-user private access denied |
+| Windows validation | Approved file creation and Linux ownership/modes passed |
+
+## Scheduled share-data backup standard
+
+The share-data backup adds no listening port.
+
+| Control | Verified state |
+|---|---|
+| Script | `/usr/local/sbin/leanops-share-backup`, `700 root:root` |
+| Service | `leanops-share-backup.service`, oneshot, `644 root:root` |
+| Timer | `leanops-share-backup.timer`, enabled and active |
+| Schedule | Daily 02:30, persistent, randomized delay up to 5 minutes |
+| Locking | Non-blocking `flock` prevents overlap |
+| Consistency boundary | Active Samba and health timer paused, then restored through EXIT trap |
+| Backup destination | `/var/backups/leanops-shares`, `700 root:root` |
+| Artifacts | Archive, manifest, and checksum, `600 root:root` |
+| Archive metadata | ACLs, extended attributes, and numeric ownership |
+| Integrity | Archive listing plus SHA-256 sidecar |
+| Retention | Newest 30 backup sets |
+| Isolated restore | Passed |
+| Off-VM verification | Windows SHA-256 comparison passed |
+| Recovery coverage | Script, service, timer, and Samba configuration included in the 21-source configuration backup |
+
 ## Configuration recovery standard
 
 The backup process does not add a listening service or network port.
 
 | Control | Verified state |
 |---|---|
-| Source definition | Root-controlled seventeen-file allowlist |
+| Source definition | Root-controlled twenty-one-file allowlist |
 | Backup destination | `/var/backups/leanops` with mode `700` |
 | Backup artifacts | Archive, manifest, and SHA-256 checksum with mode `600` |
 | Scope validation | Approved regular files only; symbolic-link sources rejected |
-| Archive inspection | Exactly seventeen expected paths listed |
-| Isolated restore | Seventeen byte-for-byte content matches |
-| Restored metadata | Seventeen ownership and permission matches |
+| Archive inspection | Exactly twenty-one expected paths listed |
+| Isolated restore | Twenty-one byte-for-byte content matches |
+| Restored metadata | Twenty-one ownership and permission matches |
 | Off-VM verification | SHA-256 comparison passed on Windows |
-| Post-reboot state | Script, allowlist, protected archive, SSH, UFW, networking, and DNS verified |
+| Post-reboot state | Script, allowlist, protected archive, SSH, UFW, networking, DNS, Samba, and both timers verified |
 
 This is a selected-configuration recovery control, not a complete server or disaster-recovery backup.
 
@@ -124,7 +166,7 @@ The health check remains available on demand and also runs through a root-owned 
 | Hardening | `NoNewPrivileges`, `PrivateTmp`, `ProtectHome`, and `ProtectSystem=full` |
 | Controlled test | Apache failure detected; evidence preserved; EXIT trap restored Apache and timer |
 | Reboot verification | Timer remained enabled and active; automatic health run completed |
-| Recovery coverage | Service and timer included in the verified 17-source configuration backup |
+| Recovery coverage | Service and timer included in the verified 21-source configuration backup |
 
 ## Health-event processing standard
 
@@ -145,7 +187,7 @@ The event handler and processor add no listening service or network port.
 | Event retention | Daily rotation, up to 180 rotations, maximum age 180 days |
 | Raw evidence retention | Files under `/var/log/leanops-incidents` cleaned after 180 days |
 
-Parsing, counting, integrated collection, duplicate suppression, recovery, permissions, live service execution, 17-source backup restoration, and retention passed.
+Parsing, counting, integrated collection, duplicate suppression, recovery, permissions, live service execution, 21-source backup restoration, and retention passed.
 
 ## Controlled notification standard
 
@@ -165,7 +207,7 @@ The notifier adds no listening service or inbound port. It submits outbound mail
 | Notification state | `/var/lib/leanops-health-monitor/notification-state.json`, `600 root:root` |
 | Delivery history | `/var/log/leanops-health-events/notification-events.tsv`, `600 root:root` |
 | Retention | Notification events rotate daily and expire after 180 days |
-| Recovery coverage | Notifier and local AppArmor policy included in the verified 17-source backup; SMTP secret excluded |
+| Recovery coverage | Notifier and local AppArmor policy included in the verified 21-source backup; SMTP secret excluded |
 
 Six transition tests and live SMTP delivery verified threshold alerts, immediate failures, grouped distinct conditions, duplicate suppression, recovery messages, and retry behavior.
 
