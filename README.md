@@ -6,7 +6,7 @@ The lab begins with a small, poorly documented environment. Each cycle identifie
 
 ## Current status
 
-**Active development: 13 PDCA cycles completed**
+**Version 1 complete: 13 PDCA cycles closed**
 
 The current system uses a hardened 15-minute health-monitor timer, durable condition and notification state, threshold-based evidence collection, grouped SMTP notifications, a host-only role-based Samba service, a protected 21-source configuration backup, daily share-data backups with 30-set retention, and 180-day operational-record retention. Cycle 13 added controlled business file sharing and recoverable share data without exposing SMB beyond the isolated lab network.
 
@@ -18,6 +18,7 @@ The current system uses a hardened 15-minute health-monitor timer, durable condi
 | What changed in each improvement cycle | [Verified outcomes](#verified-outcomes) |
 | How PDCA was applied | [PDCA records](docs/pdca/) |
 | How routine work and recovery are performed | [Operational runbooks](docs/runbooks/) |
+| What defines the completed Version 1 boundary | [Version 1 closeout](docs/project-closeout-v1.0.md) |
 | What was changed and which snapshots preserve recovery points | [Change and snapshot log](docs/change-log.md) |
 | How public evidence is protected | [Security considerations](docs/security-considerations.md) |
 
@@ -125,6 +126,6 @@ Public evidence is sanitized before publication. Passwords, private keys, tokens
 
 Windows 11, Oracle VirtualBox, Ubuntu Server, OpenSSH, Samba, Apache, UFW, Nmap, PowerShell, Bash, Python, systemd, Git, and GitHub.
 
-## Next improvement
+## Version 1 boundary
 
-Cycle 13 is verified, merged into `main`, and closed. Snapshot `26-PDCA13-FileServiceRecoveryVerified` is the current verified server recovery point. The next PDCA cycle should begin only after selecting a new observed problem with measurable success criteria, validation, and rollback.
+Cycle 13 is verified, merged into `main`, and closed. Snapshot `26-PDCA13-FileServiceRecoveryVerified` is the current verified server recovery point. Version 1 is complete; future work remains a backlog until a new observed problem is selected with measurable success criteria, validation, and rollback.
