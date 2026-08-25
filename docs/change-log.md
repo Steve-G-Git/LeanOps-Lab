@@ -40,6 +40,10 @@
 | 2026-08-20 | Added controlled grouped SMTP notifications, retry state, recovery messages, duplicate suppression, and notification-log retention | Make alert-worthy health transitions visible without emailing every repeated warning | Six logic tests, live delivery, duplicate suppression, protected records, service and timer checks, and corrected 180-day logrotate validation passed | Restore `/root/leanops-cycle12-rollback` and reload systemd, or restore `22-PDCA12-PreEmailNotifications` |
 | 2026-08-22 | Closed Cycle 12 after backup expansion and isolated recovery verification | Prove the notification standard is recoverable without archiving SMTP credentials | Backup coverage expanded from 15 to 17 non-secret sources; SHA-256 passed; all 17 sources restored with zero content or metadata mismatches; service, timer, state, retention, and failed-unit checks passed | Restore `23-PDCA12-EmailNotificationsVerified` or use the retained file-level rollback copies |
 
+| 2026-08-25 | Added a host-only Samba file service with company, operations, management, and per-user shares | Provide controlled fictional business file sharing with least-privilege access | Effective configuration, service state, UFW scope, allowed access, denied department access, private isolation, Windows file creation, and health-monitor recovery passed | Remove the TCP 445 rule, restore the previous Samba and monitoring configuration, or restore 24-PDCA13-PreFileService after preserving required share data |
+| 2026-08-25 | Added a locked persistent daily backup for `/srv/leanops-shares` | Protect user-created share data separately from selected configuration | Protected metadata and checksum artifacts, service-state restoration, 30-set retention, timer operation, isolated restore, and Windows SHA-256 verification passed | Stop and disable the backup timer, restore retained script and unit copies, or restore snapshot 25 after preserving newer data |
+| 2026-08-25 | Corrected Cycle 13 configuration-recovery coverage from 18 to 21 sources | Ensure the Samba configuration and all share-backup automation can be rebuilt | Fresh checksum and exact 21-entry scope passed; isolated restore reported zero missing, content, or metadata mismatches; Windows transfer checksum passed; Samba and both timers remained active and enabled with zero failed units | Restore the pre-correction allowlist copy or snapshot 25-PDCA13-FileServiceVerified |
+
 ## Snapshot checkpoints
 
 | Snapshot | Verified condition |
@@ -53,7 +57,7 @@
 | `06-PDCA03-KeyAuthVerified` | Dedicated key authentication verified independently and after reboot; SSH password authentication still enabled |
 | `07-PDCA03-SSHKeyOnlyVerified` | Key authentication persisted after reboot; password-only SSH rejected; only TCP 22 open |
 | `08-PDCA04-PreUFW` | UFW inactive with no saved user rules; key-only SSH and Cycle 03 state verified |
-| `09-PDCA04-UFWVerified` | UFW active with default-deny inbound policy; SSH restricted to the approved administration source; outbound access, DNS, and reboot persistence verified |
+| `09-PDCA-UFWVerified` | UFW active with default-deny inbound policy; SSH restricted to the approved administration source; outbound access, DNS, and reboot persistence verified |
 | `10-PDCA05-PreConfigBackup` | Verified Cycle 04 state before adding the configuration-backup process |
 | `11-PDCA05-ConfigBackupVerified` | Protected seven-file backup, isolated restore, off-VM checksum verification, service state, networking, firewall policy, and reboot persistence verified |
 | `12-PDCA06-PreHealthCheck` | Healthy Cycle 05 baseline before adding the server health check |
@@ -68,5 +72,8 @@
 | `21-PDCA10-HealthEventProcessingComplete` | Integrated warning evidence, duplicate suppression, recovery recording, 15-source backup and isolated restoration, service success, active timer, zero failed units, and clean shutdown verified |
 | `22-PDCA12-PreEmailNotifications` | Completed Cycle 10 state preserved before installing external email notification components |
 | `23-PDCA12-EmailNotificationsVerified` | Controlled email delivery, grouped conditions, duplicate suppression, recovery and retry behavior, protected records, 180-day retention, 17-source backup, isolated restore, active timer, and zero failed units verified |
+| `24-PDCA13-PreFileService` | Completed Cycle 12 state preserved before adding the Samba file service |
+| `25-PDCA13-FileServiceVerified` | Samba file service, role-based share access, health monitoring, alert recovery, configuration backup, share-data backup, isolated restore, and scheduled backup timer verified |
+| `26-PDCA13-FileServiceRecoveryVerified` | Configuration recovery expanded to 21 approved sources; checksum, exact scope, isolated content and metadata restore, Windows transfer verification, active services, enabled timers, and zero failed units passed |
 
-Cycle 11 changed repository documentation only. Snapshot `23-PDCA12-EmailNotificationsVerified` is the current verified server recovery point after Cycle 12.
+Cycle 11 changed repository documentation only. Snapshot `26-PDCA13-FileServiceRecoveryVerified` is the current verified server recovery point after Cycle 13.

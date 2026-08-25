@@ -10,3 +10,12 @@ Thumbs.db
 # Temporary files
 *.tmp
 *.log
+
+# Private share-data recovery artifacts
+LeanOps-Lab-Exports/
+leanops-shares-*.tar.gz
+leanops-shares-*.tar.gz.sha256
+leanops-shares-*.manifest.txt
+leanops-config-*.tar.gz
+leanops-config-*.tar.gz.sha256
+leanops-config-*.manifest.txt

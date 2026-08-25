@@ -19,10 +19,38 @@
 - Apache remains installed but stopped and disabled.
 - Ubuntu package updates were applied before the first service cycle.
 
+## File-service controls
+
+- Samba operates as a standalone authenticated file server for fictional lab identities.
+- `smbd` binds only to loopback and `enp0s8`.
+- UFW permits TCP 445 on `enp0s8` only from the approved Windows host-only address.
+- SMB2 is the minimum protocol and direct-hosted TCP 445 is the only Samba transport.
+- NetBIOS, printing, the spooler, DNS proxying, and guest shares are disabled.
+- Access-based share enumeration hides unauthorized shares.
+- Company and department shares use group authorization, forced groups, `0660` files, and `02770` directories.
+- Private shares resolve through `%U` and use `0600` files and `0700` directories.
+- The three named users are fictional lab identities and do not represent real people.
+- Allowed access, denied department access, and cross-user private denial were verified.
+
+## Share-data backup controls
+
+- `/usr/local/sbin/leanops-share-backup` and `/var/backups/leanops-shares` are `0700 root:root`.
+- Backup archives, manifests, and checksum files are `0600 root:root`.
+- A non-blocking `flock` prevents overlapping runs.
+- Samba and the health-monitor timer are paused only when active; an EXIT trap restores their prior states.
+- Temporary artifacts are promoted only after the archive listing succeeds.
+- Archives preserve ACLs, extended attributes, and numeric ownership.
+- Protected manifests record filesystem metadata and per-file hashes.
+- The newest 30 archive sets are retained.
+- The timer is persistent and runs daily at 02:30 with up to five minutes of randomized delay.
+- Share-data archives, raw manifests, inventories, hashes, and private exports are excluded from Git.
+- The final share-data package passed isolated restoration and Windows-side checksum verification.
+- The backup script, service, timer, and Samba configuration are protected by the 21-source configuration backup.
+
 ## Configuration backup controls
 
 - `/var/backups/leanops` is owned by `root:root` with mode `700`.
-- The root-controlled allowlist has mode `600` and limits each archive to seventeen approved non-secret regular files.
+- The root-controlled allowlist has mode `600` and limits each archive to 21 approved non-secret regular files.
 - The backup script has mode `700` and rejects absolute paths, parent-directory traversal, missing files, and symbolic-link sources.
 - Archives, manifests, and checksum files have mode `600`.
 - Backup scope excludes private SSH keys, `authorized_keys`, password databases, logs, and machine-specific identifiers.
@@ -37,7 +65,7 @@
 - Output reports only operational status, percentages, counts, and fictional lab addresses. It does not display configuration contents or checksum values.
 - Required-state failures return exit code `2`; warnings return `1`; an all-pass result returns `0`.
 - A controlled Apache failure was protected by an EXIT trap that restored the required inactive state.
-- The health-check script and both scheduled-monitoring unit files are included in the verified 17-source configuration backup.
+- The health-check script and both scheduled-monitoring unit files are included in the verified 21-source configuration backup.
 
 ## Scheduled-monitoring controls
 
@@ -49,7 +77,7 @@
 - `NoNewPrivileges=true`, `PrivateTmp=true`, and `ProtectHome=true` reduce service exposure.
 - `ProtectSystem=full` keeps `/usr`, `/boot`, and `/etc` read-only while allowing UFW's required runtime lock under `/run`.
 - Controlled failure testing pauses the timer and uses an EXIT trap to stop Apache and restart scheduling.
-- Both unit files are protected by the seventeen-source configuration backup.
+- Both unit files are protected by the 21-source configuration backup.
 - The notifier and local AppArmor policy are backed up, but the secret-bearing SMTP configuration is intentionally excluded.
 - Reboot verification confirms timer enablement, activation, and automatic execution.
 
@@ -88,7 +116,7 @@
 - Every evidence archive receives a manifest and SHA-256 checksum, and all artifacts have mode `600`.
 - Raw incident evidence is subject to a 180-day `systemd-tmpfiles` policy.
 - The collector records command exit codes, allowing unavailable or failed evidence sources to remain visible.
-- The collector and Cycle 10 monitoring components are included in the verified 17-source configuration backup.
+- The collector and Cycle 10 monitoring components are included in the verified 21-source configuration backup.
 
 ## Incident-response controls
 
@@ -122,10 +150,10 @@ Public documentation uses role-based placeholders for host and subnet addresses 
 - The SSH firewall rule depends on the approved Windows host-only administration address remaining stable.
 - The NAT adapter should be disconnected before any future exercise that intentionally creates a higher-risk service condition.
 - Installed but disabled Apache packages still require updates while retained for rollback.
-- The package protects selected configuration files only. It is not a full-system backup and does not preserve installed packages, user data, SSH host keys, or the VM itself.
+- The selected-configuration package is not a full-system backup and does not preserve installed packages, SSH host keys, or the VM itself. Share data is protected separately, but that process is still not full disaster recovery.
 - SHA-256 detects corruption or unexpected changes but does not authenticate who created the archive.
 - Because `authorized_keys` is intentionally excluded, administrative public-key access must be provisioned before restoring the key-only SSH configuration to a replacement server.
-- The Windows backup currently represents one off-VM copy. A separate encrypted or versioned backup destination has not yet been established.
+- The Windows exports provide one off-VM copy. A separate encrypted, automatic, or versioned off-site destination has not yet been established.
 - Package-update results use the current local APT cache. They do not prove that package metadata was refreshed immediately before the check.
 - The internet check depends on ICMP replies from `1.1.1.1`; an upstream ICMP policy could produce a failure even when other outbound traffic works.
 - Incident archives can still contain operational details such as service names, package names, fictional lab addresses, timestamps, and authentication outcomes. They remain protected and are not published raw.
@@ -134,7 +162,9 @@ Public documentation uses role-based placeholders for host and subnet addresses 
 - Health-event records rotate daily, retain up to 180 rotations, expire after 180 days, and compress older rotations.
 - SMTP delivery depends on a third-party relay, valid credentials, and outbound connectivity. A delivery failure remains visible in protected pending state for retry.
 - Notification messages contain operational condition summaries and timestamps, but no incident archive attachments or SMTP credentials.
-- The handler, processor, notifier, service and timer units, collector, retention policies, and local AppArmor policy are included in a verified 17-source configuration-backup package; the secret-bearing SMTP configuration is excluded.
+- The handler, processor, notifier, service and timer units, collector, retention policies, and local AppArmor policy are included in a verified 21-source configuration-backup package; the secret-bearing SMTP configuration is excluded.
 - Automatic collection, grouped notification, duplicate suppression, recovery messaging, and delivery retry were verified through controlled transition tests.
+- Samba uses local fictional identities rather than centralized directory authentication.
+- The daily share backup briefly pauses Samba and health-monitor scheduling; very large future datasets would require a different consistency method.
 - Successful DNS resolution during a short route failure may reflect cached resolver state and does not prove full outbound connectivity.
 - Reconfiguring a network interface can briefly interrupt traffic on that interface and requires an independent administrative path or console fallback.

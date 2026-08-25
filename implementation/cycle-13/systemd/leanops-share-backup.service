@@ -1,0 +1,14 @@
+[Unit]
+Description=LeanOps share-data backup
+Documentation=https://github.com/Steve-G-Git/LeanOps-Lab
+RequiresMountsFor=/srv/leanops-shares /var/backups/leanops-shares
+After=local-fs.target smbd.service
+
+[Service]
+Type=oneshot
+User=root
+Group=root
+UMask=0077
+ExecStart=/usr/local/sbin/leanops-share-backup
+
+ProtectControlGroups=true
